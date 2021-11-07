@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create task{% endblock %}
+
+{% block body %}
+    <ul>
+    {% for task in tasks %}
+        <li>
+            <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}">
+                <h4>{{ task.title }}</h4>
+            </a>
+        <p>{{ task.text }}</p>
+            <button>Done</button>
+            <button>Add</button>
+            <button>Edit</button>
+            <button>Delete</button>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

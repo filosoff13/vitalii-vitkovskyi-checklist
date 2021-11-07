@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Task;
+use App\Repository\TaskRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ChecklistController extends AbstractController
 {
+    private TaskRepository $taskRepository;
+
+    public function __construct(TaskRepository $taskRepository)
+    {
+        $this->taskRepository = $taskRepository;
+    }
+
     private array $categories = [
         1 => [
             'title' => 'php',
@@ -135,6 +144,42 @@ class ChecklistController extends AbstractController
         $task = $tasks[(int) $taskId];
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
+        ]);
+    }
+
+    /**
+     * @Route("/create", name="_create")
+     */
+    public function createAction(): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $newTask = new Task();
+        $newTask->setTitle('New title')->setText('New text');
+
+        $entityManager->persist($newTask);
+        $entityManager->flush();
+
+        $tasks = $this->taskRepository->findAll();
+//        return new Response('Saved new task with id' . $newTask->getId());
+
+        return $this->render('checklist/create.html.twig', [
+            'tasks' => $tasks,
+        ]);
+    }
+
+    /**
+     * @Route("/delete/{id}", name="_delete")
+     */
+    public function deleteAction(int $id): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $taskToDelete = $this->taskRepository->find($id);
+        $entityManager->remove($taskToDelete);
+        $entityManager->flush();
+
+        return $this->render('checklist/create.html.twig', [
+            'id' => $id
         ]);
     }
 }
