@@ -24,35 +24,51 @@ class ChecklistController extends AbstractController
         ],
         3 => [
             'title' => 'js',
-            'tasks' => [2, 4, 6]
+            'tasks' => [7, 8]
         ],
     ];
 
     private array $tasks = [
         1 => [ 'title' => 'Some task 1',
                 'text' => 'Text 1',
-                'id'   => 1
+                'id'   => 1,
+                'category_id' => 1
             ],
         2 => [ 'title' => 'Some task 2',
                 'text' => 'Text 2',
-                'id'   => 2
+                'id'   => 2,
+                'category_id' => 1
             ],
         3 => [ 'title' => 'Some task 3',
                 'text' => 'Text 3',
-                'id'   => 3
+                'id'   => 3,
+                'category_id' => 1
            ],
         4 => [ 'title' => 'Some task 4',
                 'text' => 'Text 4',
-                'id'   => 4
+                'id'   => 4,
+                'category_id' => 2
             ],
         5 => [ 'title' => 'Some task 5',
                 'text' => 'Text 5',
-                'id'   => 5
+                'id'   => 5,
+                'category_id' => 2
             ],
         6 => [ 'title' => 'Some task 6',
                 'text' => 'Text 6',
-                'id'   => 6
-            ]
+                'id'   => 6,
+                'category_id' => 2
+            ],
+        7 => [ 'title' => 'Some task 7',
+            'text' => 'Text 7',
+            'id'   => 7,
+            'category_id' => 3
+        ],
+        8 => [ 'title' => 'Some task 8',
+            'text' => 'Text 8',
+            'id'   => 8,
+            'category_id' => 3
+        ]
     ];
 
     /**
@@ -104,8 +120,8 @@ class ChecklistController extends AbstractController
         }
 
         $task = $tasks[(int) $taskId];
-        return $this->render('checklist/index.html.twig', [
-            'tasks' => $tasks,
+        return $this->render('checklist/get.html.twig', [
+            'task' => $task,
         ]);
     }
 }
