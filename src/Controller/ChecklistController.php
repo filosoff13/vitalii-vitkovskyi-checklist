@@ -154,17 +154,19 @@ class ChecklistController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
 
+//        $tasks = $this->taskRepository->findAll();
+
         $newTask = new Task();
         $newTask->setTitle('New title')->setText('New text');
 
         $entityManager->persist($newTask);
         $entityManager->flush();
 
-        $tasks = $this->taskRepository->findAll();
+
 //        return new Response('Saved new task with id' . $newTask->getId());
 
         return $this->render('checklist/create.html.twig', [
-            'tasks' => $tasks,
+            'id' => $newTask->getId(),
         ]);
     }
 
