@@ -8,7 +8,8 @@
         <li>
             <a href="{{ path('checklist_get', {'category_id': task.id, 'taskId': task.id}) }}">
                 <h4>{{ task.title }}</h4>
-{#                {{ task.done }}#}
+                <input type="checkbox" id="done" name="done" value="{{ task.done }}">
+                <label for="done">Done?</label>
             </a>
         <p>{{ task.text }}</p>
             <button>Done</button>

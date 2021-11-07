@@ -41,42 +41,50 @@ class ChecklistController extends AbstractController
         1 => [ 'title' => 'Some task 1',
                 'text' => 'Text 1',
                 'id'   => 1,
-                'category_id' => 1
+                'category_id' => 1,
+                'done' => true
             ],
         2 => [ 'title' => 'Some task 2',
                 'text' => 'Text 2',
                 'id'   => 2,
-                'category_id' => 1
+                'category_id' => 1,
+            'done' => true
             ],
         3 => [ 'title' => 'Some task 3',
                 'text' => 'Text 3',
                 'id'   => 3,
-                'category_id' => 1
+                'category_id' => 1,
+            'done' => true
            ],
         4 => [ 'title' => 'Some task 4',
                 'text' => 'Text 4',
                 'id'   => 4,
-                'category_id' => 2
+                'category_id' => 2,
+            'done' => true
             ],
         5 => [ 'title' => 'Some task 5',
                 'text' => 'Text 5',
                 'id'   => 5,
-                'category_id' => 2
+                'category_id' => 2,
+            'done' => true
             ],
         6 => [ 'title' => 'Some task 6',
                 'text' => 'Text 6',
                 'id'   => 6,
-                'category_id' => 2
-            ],
+                'category_id' => 2,
+                'done' => true
+        ],
         7 => [ 'title' => 'Some task 7',
             'text' => 'Text 7',
             'id'   => 7,
-            'category_id' => 3
+            'category_id' => 3,
+            'done' => true
         ],
         8 => [ 'title' => 'Some task 8',
             'text' => 'Text 8',
             'id'   => 8,
-            'category_id' => 3
+            'category_id' => 3,
+            'done' => true
         ]
     ];
 
