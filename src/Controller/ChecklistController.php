@@ -83,7 +83,6 @@ class ChecklistController extends AbstractController
 
     /**
      * @Route("/{category_id}", name="_by_category", requirements={"category_id" = "\d+"})
-     * @throws \Exception
      */
     public function ListByCategory($category_id): Response
     {
@@ -100,9 +99,23 @@ class ChecklistController extends AbstractController
         ]);
     }
 
+//    /**
+//     * @Route("/edit/{taskId}", name="_edit", requirements={"taskId" = "\d+"})
+//     */
+//    public function editEntity($taskId): Response
+//    {
+//        if (!isset($tasks[(int) $taskId])){
+//            throw new \Exception('There no such task');
+//        }
+//
+//        $task = $tasks[(int) $taskId];
+//        return $this->render('checklist/get.html.twig', [
+//            'task' => $task,
+//        ]);
+//    }
+
     /**
      * @Route("/{category_id}/{taskId}", name="_get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
-     * @throws \Exception
      */
     public function getAction($category_id, string $taskId): Response
     {
