@@ -29,6 +29,12 @@ class Task
      */
     private string $text;
 
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean")
+     */
+    private bool $done;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -43,6 +49,16 @@ class Task
     public function setText(string $text): Task
     {
         $this->text = $text;
+        return $this;
+    }
+
+    /**
+     * @param bool $done
+     * @return Task
+     */
+    public function setDone(bool $done): Task
+    {
+        $this->done = $done;
         return $this;
     }
 }

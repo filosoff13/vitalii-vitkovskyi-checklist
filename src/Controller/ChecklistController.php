@@ -83,10 +83,11 @@ class ChecklistController extends AbstractController
     /**
      * @Route("/", name="_all")
      */
-    public function ListAll(): Response
+    public function ListAll(TaskRepository $taskRepository): Response
     {
         return $this->render('checklist/index.html.twig', [
             'tasks' => $this->tasks,
+//            'tasks' => $taskRepository->findAll(),
         ]);
     }
 
@@ -126,7 +127,7 @@ class ChecklistController extends AbstractController
     /**
      * @Route("/{category_id}/{taskId}", name="_get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
      */
-    public function getAction($category_id, string $taskId): Response
+    public function getAction($category_id, string $taskId, TaskRepository $taskRepository): Response
     {
         $category_id = $this->categories[(int) $category_id] ?? null;
         if (!$category_id){
@@ -145,6 +146,11 @@ class ChecklistController extends AbstractController
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
         ]);
+//        return $this->render('checklist/get.html.twig', [
+//            'task' =>  $taskRepository->findAll(),
+//        ]);
+
+
     }
 
     /**
@@ -154,16 +160,11 @@ class ChecklistController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
 
-//        $tasks = $this->taskRepository->findAll();
-
         $newTask = new Task();
         $newTask->setTitle('New title')->setText('New text');
 
         $entityManager->persist($newTask);
         $entityManager->flush();
-
-
-//        return new Response('Saved new task with id' . $newTask->getId());
 
         return $this->render('checklist/create.html.twig', [
             'id' => $newTask->getId(),
@@ -180,7 +181,7 @@ class ChecklistController extends AbstractController
         $entityManager->remove($taskToDelete);
         $entityManager->flush();
 
-        return $this->render('checklist/create.html.twig', [
+        return $this->render('checklist/delete.html.twig', [
             'id' => $id
         ]);
     }
