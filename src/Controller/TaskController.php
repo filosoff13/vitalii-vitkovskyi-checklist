@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/checklist", name="checklist")
+ * @Route("/checklist", name="checklist_")
  */
-class ChecklistController extends AbstractController
+class TaskController extends AbstractController
 {
     private TaskRepository $taskRepository;
 
@@ -97,7 +97,7 @@ class ChecklistController extends AbstractController
     ];
 
     /**
-     * @Route("/", name="_all")
+     * @Route("/", name="all")
      */
     public function ListAll(TaskRepository $taskRepository): Response
     {
@@ -107,7 +107,7 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}", name="_by_category", requirements={"category_id" = "\d+"})
+     * @Route("/{category_id}", name="by_category", requirements={"category_id" = "\d+"})
      */
     public function listByCategory($category_id): Response
     {
@@ -128,7 +128,7 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}/{taskId}", name="_get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
+     * @Route("/{category_id}/{taskId}", name="get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
      */
     public function getAction($category_id, string $taskId, TaskRepository $taskRepository): Response
     {
@@ -155,7 +155,7 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="_create")
+     * @Route("/create", name="create")
      */
     public function createAction(): Response
     {
@@ -173,7 +173,7 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/delete/{id}", name="_delete")
+     * @Route("/delete/{id}", name="delete")
      */
     public function deleteAction(int $id): Response
     {
