@@ -4,15 +4,24 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Task;
+use App\Repository\TaskRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/checklist", name="checklist")
+ * @Route("/checklist", name="checklist_")
  */
-class ChecklistController extends AbstractController
+class TaskController extends AbstractController
 {
+    private TaskRepository $taskRepository;
+
+    public function __construct(TaskRepository $taskRepository)
+    {
+        $this->taskRepository = $taskRepository;
+    }
+
     private array $categories = [
         1 => [
             'title' => 'php',
@@ -88,9 +97,9 @@ class ChecklistController extends AbstractController
     ];
 
     /**
-     * @Route("/", name="_all")
+     * @Route("/", name="all")
      */
-    public function listAll(): Response
+    public function ListAll(TaskRepository $taskRepository): Response
     {
         return $this->render('checklist/index.html.twig', [
             'tasks' => $this->tasks,
@@ -98,7 +107,7 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}", name="_by_category", requirements={"category_id" = "\d+"})
+     * @Route("/{category_id}", name="by_category", requirements={"category_id" = "\d+"})
      */
     public function listByCategory($category_id): Response
     {
@@ -119,9 +128,9 @@ class ChecklistController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}/{taskId}", name="_get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
+     * @Route("/{category_id}/{taskId}", name="get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
      */
-    public function getAction($category_id, string $taskId): Response
+    public function getAction($category_id, string $taskId, TaskRepository $taskRepository): Response
     {
         $category_id = $this->categories[(int) $category_id] ?? null;
 
@@ -142,6 +151,39 @@ class ChecklistController extends AbstractController
 
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
+        ]);
+    }
+
+    /**
+     * @Route("/create", name="create")
+     */
+    public function createAction(): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $newTask = new Task();
+        $newTask->setTitle('New title')->setText('New text');
+
+        $entityManager->persist($newTask);
+        $entityManager->flush();
+
+        return $this->render('checklist/create.html.twig', [
+            'id' => $newTask->getId(),
+        ]);
+    }
+
+    /**
+     * @Route("/delete/{id}", name="delete")
+     */
+    public function deleteAction(int $id): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $taskToDelete = $this->taskRepository->find($id);
+        $entityManager->remove($taskToDelete);
+        $entityManager->flush();
+
+        return $this->render('checklist/delete.html.twig', [
+            'id' => $id
         ]);
     }
 }
