@@ -48,11 +48,12 @@ class Task
      * @param string $text
      * @param Category $category
      */
-    public function __construct(string $title, string $text, Category $category)
+    public function __construct(string $title, string $text, Category $category, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
         $this->category = $category;
+        $this->done = $done;
     }
 
 
