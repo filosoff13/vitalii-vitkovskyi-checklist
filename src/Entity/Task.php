@@ -37,6 +37,25 @@ class Task
      */
     private bool $done;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="tasks")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private Category $category;
+
+    /**
+     * @param string $title
+     * @param string $text
+     * @param Category $category
+     */
+    public function __construct(string $title, string $text, Category $category)
+    {
+        $this->title = $title;
+        $this->text = $text;
+        $this->category = $category;
+    }
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -61,6 +80,18 @@ class Task
     public function setDone(bool $done): Task
     {
         $this->done = $done;
+        return $this;
+    }
+
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(Category $category): self
+    {
+        $this->category = $category;
+
         return $this;
     }
 }
