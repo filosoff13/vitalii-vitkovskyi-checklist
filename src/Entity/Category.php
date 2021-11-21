@@ -32,11 +32,6 @@ class Category
      */
     private Collection $tasks;
 
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
     public function __construct(string $title)
     {
         $this->title = $title;
@@ -46,6 +41,11 @@ class Category
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
     }
 
     /**

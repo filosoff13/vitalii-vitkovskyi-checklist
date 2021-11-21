@@ -43,11 +43,6 @@ class Task
      */
     private Category $category;
 
-    /**
-     * @param string $title
-     * @param string $text
-     * @param Category $category
-     */
     public function __construct(string $title, string $text, Category $category, bool $done = false)
     {
         $this->title = $title;
@@ -56,10 +51,17 @@ class Task
         $this->done = $done;
     }
 
-
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
     }
 
     public function setTitle(string $title): Task
@@ -68,10 +70,26 @@ class Task
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
     public function setText(string $text): Task
     {
         $this->text = $text;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDone(): bool
+    {
+        return $this->done;
     }
 
     /**
