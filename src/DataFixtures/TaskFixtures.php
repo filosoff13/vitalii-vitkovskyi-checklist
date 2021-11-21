@@ -17,9 +17,6 @@ class TaskFixtures extends Fixture
         'js',
     ];
 
-    /**
-     * @throws \Exception
-     */
     public function load(ObjectManager $manager): void
     {
         $categories = [];
