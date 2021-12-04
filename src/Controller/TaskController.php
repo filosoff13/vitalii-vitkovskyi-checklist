@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Category;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -64,21 +66,34 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="create")
+     * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(): Response
+    public function createAction(Request $request, EntityManagerInterface $em): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        if ($request->getMethod() === 'GET'){
+            $categories = $em->getRepository(Category::class)->findAll();
 
-        $newTask = new Task();
-        $newTask->setTitle('New title')->setText('New text');
+            return $this->render('checklist/create.html.twig', [
+                'categories' => $categories
+            ]);
+        }
 
-        $entityManager->persist($newTask);
-        $entityManager->flush();
+        $title = (string) $request->request->get('title');
+        $text = (string) $request->request->get('text');
+        $categoryId = (int) $request->request->get('category_id');
+        $category = $em->getRepository(Category::class)->find($categoryId);
+        if (!$category){
+            throw new NotFoundHttpException('Category not found');
+        }
 
-        return $this->render('checklist/create.html.twig', [
-            'id' => $newTask->getId(),
-        ]);
+        $task = new Task($title, $text, $category);
+        $em->persist($task);
+        $em->flush();
+
+        $this->addFlash('success', sprintf('Task "%s" added', $task->getTitle()));
+
+        return $this->redirectToRoute('checklist_create');
+
     }
 
     /**
