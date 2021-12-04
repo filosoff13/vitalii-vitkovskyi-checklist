@@ -5,19 +5,22 @@
 {% block body %}
     <ul>
     {% for task in tasks %}
-        <li>
-            <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}">
-                {% if task.done %}
-                    <h4><i>{{ task.title }}</i></h4>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ task.title }}</h5>
+                <p class="card-text">{{ task.text }}</p>
+                {% if task.done == true %}
+                <button type="button" class="btn btn-success">Done</button>
                 {% else %}
-                    <h4>{{ task.title }}</h4>
+                <button type="button" class="btn btn-danger">Don't done</button>
                 {% endif %}
-            </a>
-        <p>{{ task.text }}</p>
-            <button>Add</button>
-            <button>Edit</button>
-            <button>Delete</button>
-        </li>
+                <button>Edit</button>
+                <button>Delete</button>
+                <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}" class="btn btn-primary">
+                    See more
+                </a>
+            </div>
+        </div>
     {% endfor %}
     </ul>
     <button type="submit">
