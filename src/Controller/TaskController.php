@@ -9,6 +9,8 @@ use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -82,15 +84,17 @@ class TaskController extends AbstractController
     /**
      * @Route("/delete/{id}", name="delete")
      */
-    public function deleteAction(int $id): Response
+    public function deleteAction(int $id, EntityManagerInterface $em): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
         $taskToDelete = $this->taskRepository->find($id);
-        $entityManager->remove($taskToDelete);
-        $entityManager->flush();
+        if (!$taskToDelete){
+            throw new NotFoundHttpException('Task was not found');
+        }
+        $em->remove($taskToDelete);
+        $em->flush();
 
-        return $this->render('checklist/delete.html.twig', [
-            'id' => $id
-        ]);
+        $this->addFlash('success', sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
+
+        return $this->redirectToRoute('checklist_all');
     }
 }
