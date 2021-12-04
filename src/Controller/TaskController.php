@@ -22,16 +22,19 @@ class TaskController extends AbstractController
         $this->taskRepository = $taskRepository;
     }
 
-    private array $categories = [
+    public static array $categories = [
         1 => [
+            'id' => 1,
             'title' => 'php',
             'tasks' => [1, 2, 3]
         ],
         2 => [
+            'id' => 2,
             'title' => 'other',
             'tasks' => [4, 5, 6]
         ],
         3 => [
+            'id' => 3,
             'title' => 'js',
             'tasks' => [7, 8]
         ],
@@ -111,7 +114,7 @@ class TaskController extends AbstractController
      */
     public function listByCategory($category_id): Response
     {
-        $category_id = $this->categories[(int) $category_id] ?? null;
+        $category_id = self::$categories[(int) $category_id] ?? null;
 
         if (!$category_id){
             throw new \Exception('You ask for the category which does not exist');
@@ -132,7 +135,7 @@ class TaskController extends AbstractController
      */
     public function getAction($category_id, string $taskId, TaskRepository $taskRepository): Response
     {
-        $category_id = $this->categories[(int) $category_id] ?? null;
+        $category_id = self::$categories[(int) $category_id] ?? null;
 
         if (!$category_id){
             throw new \Exception('You ask for the category which does not exist');

@@ -15,19 +15,9 @@
         {% endblock %}
     </head>
     <body>
-{#    <section class="header">#}
-{#        <ul class="menu">#}
-{#            <li>#}
-{#                <a href="{{ path('checklist_by_category', {'category_id':1}) }}">php</a>#}
-{#                <a href="{{ path('checklist_by_category', {'category_id':2}) }}">other</a>#}
-{#                <a href="{{ path('checklist_by_category', {'category_id':3}) }}">js</a>#}
-{#            </li>#}
-
-{#        </ul>#}
-
         <nav class="navbar navbar-dark navbar-expand-lg navbar-light bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">DV Campus Notelist</a>
+                <a class="navbar-brand" href="#">DV Campus Checklist</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -44,7 +34,7 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 {% for category in get_categories() %}
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('notelist_list_by_category', {'category_id': category.id }) }}">
+                                        <a class="dropdown-item" href="{{ path('checklist_by_category', {'category_id': category.id }) }}">
                                             {{ category.title }}
                                         </a>
                                     </li>
@@ -53,13 +43,13 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{ path('notelist_create') }}">Add new notelist</a>
+                            <a class="nav-link" aria-current="page" href="{{ path('checklist_create') }}">Add new task</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
-
+        {% block body %}{% endblock %}
         <div class="container">
             <div class="row">
                 <div class="mt-3">
