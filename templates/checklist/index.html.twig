@@ -16,7 +16,7 @@
                 {% endif %}
                 <button>Edit</button>
                 <button>Delete</button>
-                <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}" class="btn btn-primary">
+                <a href="{{ path('checklist_get', {'category_id': task.category.id, 'taskId': task.id}) }}" class="btn btn-primary">
                     See more
                 </a>
             </div>
