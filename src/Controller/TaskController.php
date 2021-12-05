@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/checklist", name="checklist_")
@@ -69,7 +72,7 @@ class TaskController extends AbstractController
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(Request $request, EntityManagerInterface $em): Response
+    public function createAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
     {
         if ($request->getMethod() === 'GET'){
             $categories = $em->getRepository(Category::class)->findAll();
@@ -88,11 +91,19 @@ class TaskController extends AbstractController
         }
 
         $task = new Task($title, $text, $category);
-        $em->persist($task);
-        $em->flush();
 
-        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" added', $task->getTitle()));
+        /** @var ConstraintViolationList $errors */
+        $errors = $validator->validate($task);
+        foreach ($errors as $error){
+            $this->addFlash(FlashMessagesEnum::FAIL, $error->getMessage());
+        }
 
+        if (!$errors->count()) {
+            $em->persist($task);
+            $em->flush();
+
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" added', $task->getTitle()));
+        }
         return $this->redirectToRoute('checklist_create');
 
     }
