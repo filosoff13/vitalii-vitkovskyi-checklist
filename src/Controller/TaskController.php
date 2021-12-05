@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Entity\Task;
+use App\Enum\FlashMessagesEnum;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -90,7 +91,7 @@ class TaskController extends AbstractController
         $em->persist($task);
         $em->flush();
 
-        $this->addFlash('success', sprintf('Task "%s" added', $task->getTitle()));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" added', $task->getTitle()));
 
         return $this->redirectToRoute('checklist_create');
 
@@ -108,7 +109,7 @@ class TaskController extends AbstractController
         $em->remove($taskToDelete);
         $em->flush();
 
-        $this->addFlash('success', sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
 
         return $this->redirectToRoute('checklist_all');
     }

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Entity\Task;
+use App\Enum\FlashMessagesEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +30,7 @@ class CategoryController extends AbstractController
         $em->persist($category);
         $em->flush();
 
-        $this->addFlash('success', sprintf('Category %s was created', $name));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category %s was created', $name));
 
         return $this->redirectToRoute('page_home');
     }
@@ -47,7 +48,7 @@ class CategoryController extends AbstractController
         $em->remove($category);
         $em->flush();
 
-        $this->addFlash('success', sprintf('Category %s was removed', $category->getTitle()));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category %s was removed', $category->getTitle()));
 
         return $this->redirectToRoute('page_home');
     }
