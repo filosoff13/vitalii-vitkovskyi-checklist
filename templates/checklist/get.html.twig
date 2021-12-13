@@ -3,8 +3,19 @@
 {% block title %}List of all tasks{% endblock %}
 
 {% block body %}
-    <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}">
-        <h4>{{ task.title }}</h4>
-    </a>
-    <p>{{ task.text }}</p>
+{#    <a href="{{ path('checklist_get', {'category_id': task.category_id, 'taskId': task.id}) }}">#}
+{#        <h4>{{ task.title }}</h4>#}
+{#    </a>#}
+{#    <p>{{ task.text }}</p>#}
+    <div class="card">
+        <h5 class="card-header">{{ task.title }}</h5>
+        <div class="card-body">
+            <p class="card-text">{{ task.text }}</p>
+        </div>
+        <div class="card-header">
+            <a class="btn btn-outline-danger float-end" href="{{ path('checklist_delete', {'id': task.id}) }}" role="button">
+                Delete
+            </a>
+        </div>
+    </div>
 {% endblock %}

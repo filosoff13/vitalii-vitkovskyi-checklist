@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Category;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -22,106 +27,24 @@ class TaskController extends AbstractController
         $this->taskRepository = $taskRepository;
     }
 
-    private array $categories = [
-        1 => [
-            'title' => 'php',
-            'tasks' => [1, 2, 3]
-        ],
-        2 => [
-            'title' => 'other',
-            'tasks' => [4, 5, 6]
-        ],
-        3 => [
-            'title' => 'js',
-            'tasks' => [7, 8]
-        ],
-    ];
-
-    private array $tasks = [
-        1 => [
-            'title' => 'Some task 1',
-            'text' => 'Text 1',
-            'id'   => 1,
-            'category_id' => 1,
-            'done' => true
-        ],
-        2 => [
-            'title' => 'Some task 2',
-            'text' => 'Text 2',
-            'id'   => 2,
-            'category_id' => 1,
-            'done' => true
-        ],
-        3 => [
-            'title' => 'Some task 3',
-            'text' => 'Text 3',
-            'id'   => 3,
-            'category_id' => 1,
-            'done' => true
-        ],
-        4 => [
-            'title' => 'Some task 4',
-            'text' => 'Text 4',
-            'id'   => 4,
-            'category_id' => 2,
-            'done' => true
-        ],
-        5 => [
-            'title' => 'Some task 5',
-            'text' => 'Text 5',
-            'id'   => 5,
-            'category_id' => 2,
-            'done' => false
-        ],
-        6 => [
-            'title' => 'Some task 6',
-            'text' => 'Text 6',
-            'id'   => 6,
-            'category_id' => 2,
-            'done' => false
-        ],
-        7 => [
-            'title' => 'Some task 7',
-            'text' => 'Text 7',
-            'id'   => 7,
-            'category_id' => 3,
-            'done' => false
-        ],
-        8 => [
-            'title' => 'Some task 8',
-            'text' => 'Text 8',
-            'id'   => 8,
-            'category_id' => 3,
-            'done' => true
-        ]
-    ];
-
     /**
      * @Route("/", name="all")
      */
-    public function ListAll(TaskRepository $taskRepository): Response
+    public function ListAll(EntityManagerInterface $em): Response
     {
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $this->tasks,
+            'tasks' => $em->getRepository(Task::class)->findAll(),
         ]);
     }
 
     /**
      * @Route("/{category_id}", name="by_category", requirements={"category_id" = "\d+"})
      */
-    public function listByCategory($category_id): Response
+    public function listByCategory(string $category_id, EntityManagerInterface $em): Response
     {
-        $category_id = $this->categories[(int) $category_id] ?? null;
-
-        if (!$category_id){
-            throw new \Exception('You ask for the category which does not exist');
-        }
-
-        $tasksIds = $category_id['tasks'];
-        $tasks = array_filter($this->tasks, function (array $task) use ($tasksIds){
-            return in_array($task['id'], $tasksIds, true);
-        });
-
+        $tasks = $em->getRepository(Task::class)->findBy([
+            'category' => $category_id
+        ]);
         return $this->render('checklist/index.html.twig', [
             'tasks' => $tasks,
         ]);
@@ -130,24 +53,12 @@ class TaskController extends AbstractController
     /**
      * @Route("/{category_id}/{taskId}", name="get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
      */
-    public function getAction($category_id, string $taskId, TaskRepository $taskRepository): Response
+    public function getAction(string $category_id, string $taskId, EntityManagerInterface $em): Response
     {
-        $category_id = $this->categories[(int) $category_id] ?? null;
-
-        if (!$category_id){
-            throw new \Exception('You ask for the category which does not exist');
-        }
-
-        $tasksIds = $category_id['tasks'];
-        $tasks = array_filter($this->tasks, function (array $task) use ($tasksIds){
-            return in_array($task['id'], $tasksIds, true);
-        });
-
-        if (!isset($tasks[(int) $taskId])){
-            throw new \Exception('There no task in this category');
-        }
-
-        $task = $tasks[(int) $taskId];
+        $task = $em->getRepository(Task::class)->findOneBy([
+            'category' => (int) $category_id,
+            'id' => $taskId
+        ]);
 
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
@@ -155,35 +66,50 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="create")
+     * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(): Response
+    public function createAction(Request $request, EntityManagerInterface $em): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        if ($request->getMethod() === 'GET'){
+            $categories = $em->getRepository(Category::class)->findAll();
 
-        $newTask = new Task();
-        $newTask->setTitle('New title')->setText('New text');
+            return $this->render('checklist/create.html.twig', [
+                'categories' => $categories
+            ]);
+        }
 
-        $entityManager->persist($newTask);
-        $entityManager->flush();
+        $title = (string) $request->request->get('title');
+        $text = (string) $request->request->get('text');
+        $categoryId = (int) $request->request->get('category_id');
+        $category = $em->getRepository(Category::class)->find($categoryId);
+        if (!$category){
+            throw new NotFoundHttpException('Category not found');
+        }
 
-        return $this->render('checklist/create.html.twig', [
-            'id' => $newTask->getId(),
-        ]);
+        $task = new Task($title, $text, $category);
+        $em->persist($task);
+        $em->flush();
+
+        $this->addFlash('success', sprintf('Task "%s" added', $task->getTitle()));
+
+        return $this->redirectToRoute('checklist_create');
+
     }
 
     /**
      * @Route("/delete/{id}", name="delete")
      */
-    public function deleteAction(int $id): Response
+    public function deleteAction(int $id, EntityManagerInterface $em): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
         $taskToDelete = $this->taskRepository->find($id);
-        $entityManager->remove($taskToDelete);
-        $entityManager->flush();
+        if (!$taskToDelete){
+            throw new NotFoundHttpException('Task was not found');
+        }
+        $em->remove($taskToDelete);
+        $em->flush();
 
-        return $this->render('checklist/delete.html.twig', [
-            'id' => $id
-        ]);
+        $this->addFlash('success', sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
+
+        return $this->redirectToRoute('checklist_all');
     }
 }
