@@ -64,11 +64,18 @@ class Task
      */
     private Category $category;
 
-    public function __construct(string $title, string $text, Category $category, bool $done = false)
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private User $user;
+
+    public function __construct(string $title, string $text, Category $category, User $user, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
         $this->category = $category;
+        $this->user = $user;
         $this->done = $done;
     }
 
@@ -131,6 +138,18 @@ class Task
     public function setCategory(Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
