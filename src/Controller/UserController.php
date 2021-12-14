@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -68,5 +69,27 @@ class UserController extends AbstractController
         }
 
         return $this->redirectToRoute('page_home');
+    }
+
+    /**
+     * @Route("/login", name="login")
+     */
+    public function login(AuthenticationUtils $authenticationUtils): Response
+    {
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $this->addFlash(FlashMessagesEnum::FAIL, $error
+            ? $error->getMessage()
+            : 'You should be authenticated'
+        );
+
+        return $this->redirectToRoute('page_home');
+    }
+
+    /**
+     * @Route("/logout", name="logout", methods={"GET"})
+     */
+    public function logout(): void
+    {
+        throw new \Exception('Unreachable statement');
     }
 }
