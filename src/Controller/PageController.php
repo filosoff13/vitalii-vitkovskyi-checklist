@@ -15,6 +15,10 @@ class PageController extends AbstractController
      */
     public function index(): Response
     {
-        return $this->redirectToRoute('checklist_all');
+        if ($this->getUser()){
+            return $this->redirectToRoute('checklist_all');
+        }
+
+        return $this->render('page/home.html.twig');
     }
 }
