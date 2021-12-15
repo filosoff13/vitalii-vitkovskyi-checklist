@@ -48,6 +48,8 @@ class CategoryController extends AbstractController
 
     /**
      * @Route("/delete/{id}", name="delete", requirements={"id"="\d+"})
+     *
+     * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
     public function deleteAction(Category $category, EntityManagerInterface $em): Response
     {

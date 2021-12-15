@@ -36,6 +36,8 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/category/{id}", name="by_category", requirements={"id" = "\d+"})
+     *
+     * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
     public function listByCategory(Category $category, EntityManagerInterface $em): Response
     {
@@ -50,6 +52,8 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/{id}", name="get", requirements={"id" = "\d+"})
+     *
+     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
      */
     public function getAction(Task $task): Response
     {
@@ -99,6 +103,8 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/delete/{id}", name="delete")
+     *
+     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
      */
     public function deleteAction(Task $task, EntityManagerInterface $em): Response
     {
