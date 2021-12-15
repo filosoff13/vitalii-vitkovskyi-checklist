@@ -6,7 +6,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Category;
 use App\Entity\Task;
-use App\Entity\User;
+use App\Service\UserService;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -17,13 +17,19 @@ class TaskFixtures extends Fixture
         'other',
         'js',
     ];
+    private UserService $userService;
 
+    public function __construct(UserService $userService)
+    {
+
+        $this->userService = $userService;
+    }
     public function load(ObjectManager $manager): void
     {
         $users = [];
 
         for ($i = 0; $i < 3; $i++){
-            $user = new User("user $i");
+            $user = $this->userService->create("user$i 111", "user $i");
             $manager->persist($user);
             $users[] = $user;
         }
