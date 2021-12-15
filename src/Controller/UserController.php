@@ -25,6 +25,8 @@ class UserController extends AbstractController
 {
     /**
      * @Route("/registration", name="registration", methods={"POST"})
+     *
+     * @IsGranted("IS_ANONYMOUS_USER")
      */
     public function registration(Request $request, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, EntityManagerInterface $em): Response
     {
@@ -74,6 +76,8 @@ class UserController extends AbstractController
 
     /**
      * @Route("/login", name="login")
+     *
+     * @IsGranted("IS_ANONYMOUS_USER")
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
