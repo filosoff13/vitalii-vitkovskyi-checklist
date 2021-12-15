@@ -47,6 +47,7 @@ class UserService
         ]);
         if ($passwordErrors->count()) {
             foreach ($passwordErrors as $error) {
+                throw new \Exception($error->getMessage());
                 $this->session->getFlashBag()->add(FlashMessagesEnum::FAIL, $error->getMessage());
             }
 

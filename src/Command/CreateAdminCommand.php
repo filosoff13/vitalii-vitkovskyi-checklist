@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Service\UserService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +16,13 @@ class CreateAdminCommand extends Command
 {
     protected static $defaultName = 'app:create-admin';
     protected static $defaultDescription = 'Create admin user';
+    private UserService $userService;
+
+    public function __construct(UserService $userService, string $name = null)
+    {
+        parent::__construct($name);
+        $this->userService = $userService;
+    }
 
     protected function configure(): void
     {
@@ -35,8 +43,14 @@ class CreateAdminCommand extends Command
         $output->writeln('opt1 ' . $input->getOption('username'));
         $output->writeln('opt2 ' . $input->getOption('password'));
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        try {
+            $this->userService->createAndFlush($password, $userName);
+            $io->success('Congratulation! Admin user successfully created.');
 
-        return Command::SUCCESS;
+            return Command::SUCCESS;
+        } catch (\Exception $e){
+            $io->error($e->getMessage());
+            return Command::FAILURE;
+        }
     }
 }
