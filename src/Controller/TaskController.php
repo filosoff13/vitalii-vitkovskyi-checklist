@@ -87,7 +87,7 @@ class TaskController extends AbstractController
         $title = (string) $request->request->get('title');
         $text = (string) $request->request->get('text');
         $categoryId = (int) $request->request->get('category_id');
-        $category = $em->getRepository(Category::class)->find(['id' => $categoryId, 'user' => $this->getUser()]);
+        $category = $em->getRepository(Category::class)->findOneBy(['id' => $categoryId, 'user' => $this->getUser()]);
         if (!$category){
             throw new NotFoundHttpException('Category not found');
         }

@@ -25,9 +25,11 @@
         </div>
     {% endfor %}
     </ul>
+    {% if app.user %}
     <button type="submit">
         <a href="{{ path('checklist_create') }}">
             Add task
         </a>
     </button>
+    {% endif %}
 {% endblock %}

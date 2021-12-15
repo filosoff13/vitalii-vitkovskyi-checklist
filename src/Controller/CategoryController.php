@@ -51,7 +51,7 @@ class CategoryController extends AbstractController
      */
     public function deleteAction(string $id, EntityManagerInterface $em): Response
     {
-        $category = $em->getRepository(Category::class)->findBy(['id' => $id, 'user' => $this->getUser()]);
+        $category = $em->getRepository(Category::class)->findOneBy(['id' => $id, 'user' => $this->getUser()]);
         if (!$category) {
             throw new NotFoundHttpException('Category not found');
         }
