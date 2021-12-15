@@ -18,7 +18,7 @@
                 <a class="btn btn-outline-danger" href="{{ path('checklist_delete', {'id': task.id}) }}" role="button">
                     Delete
                 </a>
-                <a href="{{ path('checklist_get', {'category_id': task.category.id, 'taskId': task.id}) }}" class="btn btn-primary">
+                <a href="{{ path('checklist_get', {'id': task.id}) }}" class="btn btn-primary">
                     See more
                 </a>
             </div>

@@ -7,15 +7,12 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
-use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -24,13 +21,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TaskController extends AbstractController
 {
-    private TaskRepository $taskRepository;
-
-    public function __construct(TaskRepository $taskRepository)
-    {
-        $this->taskRepository = $taskRepository;
-    }
-
     /**
      * @Route("/", name="all")
      */
@@ -42,12 +32,12 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}", name="by_category", requirements={"category_id" = "\d+"})
+     * @Route("/category/{id}", name="by_category", requirements={"id" = "\d+"})
      */
-    public function listByCategory(string $category_id, EntityManagerInterface $em): Response
+    public function listByCategory(Category $category, EntityManagerInterface $em): Response
     {
         $tasks = $em->getRepository(Task::class)->findBy([
-            'category' => (int) $category_id,
+            'category' => $category,
             'user' => $this->getUser()
         ]);
         return $this->render('checklist/index.html.twig', [
@@ -56,16 +46,10 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}/{taskId}", name="get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
+     * @Route("/{id}", name="get", requirements={"id" = "\d+"})
      */
-    public function getAction(string $category_id, string $taskId, EntityManagerInterface $em): Response
+    public function getAction(Task $task): Response
     {
-        $task = $em->getRepository(Task::class)->findOneBy([
-            'category' => (int) $category_id,
-            'id' => $taskId,
-            'user' => $this->getUser()
-        ]);
-
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
         ]);
@@ -113,16 +97,12 @@ class TaskController extends AbstractController
     /**
      * @Route("/delete/{id}", name="delete")
      */
-    public function deleteAction(int $id, EntityManagerInterface $em): Response
+    public function deleteAction(Task $task, EntityManagerInterface $em): Response
     {
-        $taskToDelete = $this->taskRepository->findBy(['id' => $id, 'user' => $this->getUser()]);
-        if (!$taskToDelete){
-            throw new NotFoundHttpException('Task was not found');
-        }
-        $em->remove($taskToDelete);
+        $em->remove($task);
         $em->flush();
 
-        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));
 
         return $this->redirectToRoute('checklist_all');
     }

@@ -49,13 +49,8 @@ class CategoryController extends AbstractController
     /**
      * @Route("/delete/{id}", name="delete", requirements={"id"="\d+"})
      */
-    public function deleteAction(string $id, EntityManagerInterface $em): Response
+    public function deleteAction(Category $category, EntityManagerInterface $em): Response
     {
-        $category = $em->getRepository(Category::class)->findOneBy(['id' => $id, 'user' => $this->getUser()]);
-        if (!$category) {
-            throw new NotFoundHttpException('Category not found');
-        }
-
         $em->remove($category);
         $em->flush();
 
