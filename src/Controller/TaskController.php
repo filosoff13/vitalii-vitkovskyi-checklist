@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +19,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/checklist", name="checklist_")
+ *
+ * @IsGranted("ROLE_USER")
  */
 class TaskController extends AbstractController
 {
