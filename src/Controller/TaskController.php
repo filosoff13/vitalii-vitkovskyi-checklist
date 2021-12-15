@@ -7,15 +7,13 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
+use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/checklist", name="checklist_")
@@ -65,9 +63,9 @@ class TaskController extends AbstractController
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
+    public function createAction(Request $request, EntityManagerInterface $em, TaskService $taskService): Response
     {
-        if ($request->getMethod() === 'GET'){
+        if ($request->getMethod() === 'GET') {
             $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
 
             return $this->render('checklist/create.html.twig', [
@@ -75,30 +73,14 @@ class TaskController extends AbstractController
             ]);
         }
 
-        $title = (string) $request->request->get('title');
-        $text = (string) $request->request->get('text');
-        $categoryId = (int) $request->request->get('category_id');
-        $category = $em->getRepository(Category::class)->findOneBy(['id' => $categoryId, 'user' => $this->getUser()]);
-        if (!$category){
-            throw new NotFoundHttpException('Category not found');
-        }
+        $taskService->createAndFlush(
+            (string) $request->request->get('title'),
+            (string) $request->request->get('text'),
+            (int) $request->request->get('category_id'),
+            $this->getUser()
+        );
 
-        $task = new Task($title, $text, $category, $this->getUser());
-
-        /** @var ConstraintViolationList $errors */
-        $errors = $validator->validate($task);
-        foreach ($errors as $error){
-            $this->addFlash(FlashMessagesEnum::FAIL, $error->getMessage());
-        }
-
-        if (!$errors->count()) {
-            $em->persist($task);
-            $em->flush();
-
-            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" added', $task->getTitle()));
-        }
         return $this->redirectToRoute('checklist_create');
-
     }
 
     /**
