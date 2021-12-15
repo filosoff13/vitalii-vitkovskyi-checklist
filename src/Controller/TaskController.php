@@ -37,7 +37,7 @@ class TaskController extends AbstractController
     public function ListAll(EntityManagerInterface $em): Response
     {
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $em->getRepository(Task::class)->findAll(),
+            'tasks' => $em->getRepository(Task::class)->findBy(['user' => $this->getUser()]),
         ]);
     }
 
@@ -47,7 +47,8 @@ class TaskController extends AbstractController
     public function listByCategory(string $category_id, EntityManagerInterface $em): Response
     {
         $tasks = $em->getRepository(Task::class)->findBy([
-            'category' => $category_id
+            'category' => (int) $category_id,
+            'user' => $this->getUser()
         ]);
         return $this->render('checklist/index.html.twig', [
             'tasks' => $tasks,
@@ -61,7 +62,8 @@ class TaskController extends AbstractController
     {
         $task = $em->getRepository(Task::class)->findOneBy([
             'category' => (int) $category_id,
-            'id' => $taskId
+            'id' => $taskId,
+            'user' => $this->getUser()
         ]);
 
         return $this->render('checklist/get.html.twig', [
@@ -75,7 +77,7 @@ class TaskController extends AbstractController
     public function createAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
     {
         if ($request->getMethod() === 'GET'){
-            $categories = $em->getRepository(Category::class)->findAll();
+            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
 
             return $this->render('checklist/create.html.twig', [
                 'categories' => $categories
@@ -85,12 +87,12 @@ class TaskController extends AbstractController
         $title = (string) $request->request->get('title');
         $text = (string) $request->request->get('text');
         $categoryId = (int) $request->request->get('category_id');
-        $category = $em->getRepository(Category::class)->find($categoryId);
+        $category = $em->getRepository(Category::class)->find(['id' => $categoryId, 'user' => $this->getUser()]);
         if (!$category){
             throw new NotFoundHttpException('Category not found');
         }
 
-        $task = new Task($title, $text, $category);
+        $task = new Task($title, $text, $category, $this->getUser());
 
         /** @var ConstraintViolationList $errors */
         $errors = $validator->validate($task);
@@ -113,7 +115,7 @@ class TaskController extends AbstractController
      */
     public function deleteAction(int $id, EntityManagerInterface $em): Response
     {
-        $taskToDelete = $this->taskRepository->find($id);
+        $taskToDelete = $this->taskRepository->findBy(['id' => $id, 'user' => $this->getUser()]);
         if (!$taskToDelete){
             throw new NotFoundHttpException('Task was not found');
         }

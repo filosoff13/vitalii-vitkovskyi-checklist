@@ -28,7 +28,7 @@ class CategoryController extends AbstractController
     public function createAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
     {
         $name = $request->request->get('name');
-        $category = new Category($name);
+        $category = new Category($name, $this->getUser());
 
         /** @var ConstraintViolationList $errors */
         $errors = $validator->validate($category);
@@ -51,7 +51,7 @@ class CategoryController extends AbstractController
      */
     public function deleteAction(string $id, EntityManagerInterface $em): Response
     {
-        $category = $em->getRepository(Category::class)->find($id);
+        $category = $em->getRepository(Category::class)->findBy(['id' => $id, 'user' => $this->getUser()]);
         if (!$category) {
             throw new NotFoundHttpException('Category not found');
         }

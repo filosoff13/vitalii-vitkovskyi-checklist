@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -68,9 +69,9 @@ class Task
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private User $user;
+    private UserInterface $user;
 
-    public function __construct(string $title, string $text, Category $category, User $user, bool $done = false)
+    public function __construct(string $title, string $text, Category $category, UserInterface $user, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
@@ -142,12 +143,12 @@ class Task
         return $this;
     }
 
-    public function getUser(): User
+    public function getUser(): UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(User $user): self
+    public function setUser(UserInterface $user): self
     {
         $this->user = $user;
 
