@@ -25,7 +25,7 @@ class UserController extends AbstractController
      */
     public function registration(Request $request, UserService $userService): Response
     {
-        $userService->createAndFlush(
+        $userService->createAndFlushOnHTTPRequest(
             (string) $request->request->get('password'),
             (string) $request->request->get('username'));
 
