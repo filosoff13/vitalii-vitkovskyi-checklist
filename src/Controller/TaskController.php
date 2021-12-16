@@ -98,3 +98,4 @@ class TaskController extends AbstractController
         return $this->redirectToRoute('checklist_all');
     }
 }
+
