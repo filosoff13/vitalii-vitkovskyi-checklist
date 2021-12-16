@@ -36,17 +36,10 @@ class UserService
 
     public function createAndFlush(string $plainPassword, string $username): void
     {
-        $this->validateUserPassword($plainPassword);
-        $user = $this->create($plainPassword, $username);
-        $this->validateUser($user);
-        $this->em->persist($user);
-        $this->em->flush();
-    }
-
-    public function createAndFlushOnHTTPRequest(string $plainPassword, string $username): void
-    {
         try {
-            $this->createAndFlush($plainPassword, $username);
+            $user = $this->create($plainPassword, $username);
+            $this->em->persist($user);
+            $this->em->flush();
             $this->session->getFlashBag()->add(FlashMessagesEnum::SUCCESS, "You have been registered!");
         } catch (UserValidationException $exception) {
             $this->session->getFlashBag()->add(FlashMessagesEnum::FAIL, $exception->getMessage());
@@ -55,12 +48,14 @@ class UserService
 
     public function create(string $plainPassword, string $username): User
     {
+        $this->validateUserPassword($plainPassword);
         $user = new User($username);
         $hashedPassword = $this->passwordHasher->hashPassword(
             $user,
             $plainPassword
         );
         $user->setPassword($hashedPassword);
+        $this->validateUser($user);
 
         return $user;
     }
@@ -92,3 +87,4 @@ class UserService
         }
     }
 }
+

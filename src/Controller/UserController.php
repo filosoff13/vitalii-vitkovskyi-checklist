@@ -25,7 +25,7 @@ class UserController extends AbstractController
      */
     public function registration(Request $request, UserService $userService): Response
     {
-        $userService->createAndFlushOnHTTPRequest(
+        $userService->createAndFlush(
             (string) $request->request->get('password'),
             (string) $request->request->get('username'));
 
@@ -58,3 +58,4 @@ class UserController extends AbstractController
         throw new \Exception('Unreachable statement');
     }
 }
+
