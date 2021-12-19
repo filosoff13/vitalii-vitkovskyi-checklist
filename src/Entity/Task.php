@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TaskRepository::class)
@@ -17,17 +18,35 @@ class Task
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=100)
+     *
+     * @Assert\NotBlank(message="Task title should not be blank")
+     *
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 30,
+     *      minMessage = "Your task title must be at least {{ limit }} characters long",
+     *      maxMessage = "Your task title cannot be longer than {{ limit }} characters"
+     * )
      */
     private string $title;
 
     /**
      * @var string
      * @ORM\Column(type="text")
+     *
+     * @Assert\NotBlank(message="Task text should not be blank")
+     *
+     * @Assert\Length(
+     *      min = 30,
+     *      max = 254,
+     *      minMessage = "Your task text must be at least {{ limit }} characters long",
+     *      maxMessage = "Your task text cannot be longer than {{ limit }} characters"
+     * )
      */
     private string $text;
 
@@ -40,6 +59,8 @@ class Task
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="tasks")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Assert\NotBlank(message="Category cannot be empty")
      */
     private Category $category;
 
