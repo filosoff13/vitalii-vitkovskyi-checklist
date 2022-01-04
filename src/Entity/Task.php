@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Model\Ownable;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TaskRepository::class)
  */
-class Task
+class Task implements Ownable
 {
     /**
      * @ORM\Id
@@ -64,11 +66,18 @@ class Task
      */
     private Category $category;
 
-    public function __construct(string $title, string $text, Category $category, bool $done = false)
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private UserInterface $user;
+
+    public function __construct(string $title, string $text, Category $category, UserInterface $user, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
         $this->category = $category;
+        $this->user = $user;
         $this->done = $done;
     }
 
@@ -131,6 +140,18 @@ class Task
     public function setCategory(Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
+
+    public function setUser(UserInterface $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

@@ -7,47 +7,41 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
-use App\Repository\TaskRepository;
+use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\ConstraintViolation;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/checklist", name="checklist_")
+ *
+ * @IsGranted("ROLE_USER")
  */
 class TaskController extends AbstractController
 {
-    private TaskRepository $taskRepository;
-
-    public function __construct(TaskRepository $taskRepository)
-    {
-        $this->taskRepository = $taskRepository;
-    }
-
     /**
      * @Route("/", name="all")
      */
     public function ListAll(EntityManagerInterface $em): Response
     {
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $em->getRepository(Task::class)->findAll(),
+            'tasks' => $em->getRepository(Task::class)->findBy(['user' => $this->getUser()]),
         ]);
     }
 
     /**
-     * @Route("/{category_id}", name="by_category", requirements={"category_id" = "\d+"})
+     * @Route("/category/{id}", name="by_category", requirements={"id" = "\d+"})
+     *
+     * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
-    public function listByCategory(string $category_id, EntityManagerInterface $em): Response
+    public function listByCategory(Category $category, EntityManagerInterface $em): Response
     {
         $tasks = $em->getRepository(Task::class)->findBy([
-            'category' => $category_id
+            'category' => $category,
+            'user' => $this->getUser()
         ]);
         return $this->render('checklist/index.html.twig', [
             'tasks' => $tasks,
@@ -55,15 +49,12 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/{category_id}/{taskId}", name="get", requirements={"category_id" = "\d+", "taskId" = "\d+"})
+     * @Route("/{id}", name="get", requirements={"id" = "\d+"})
+     *
+     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
      */
-    public function getAction(string $category_id, string $taskId, EntityManagerInterface $em): Response
+    public function getAction(Task $task): Response
     {
-        $task = $em->getRepository(Task::class)->findOneBy([
-            'category' => (int) $category_id,
-            'id' => $taskId
-        ]);
-
         return $this->render('checklist/get.html.twig', [
             'task' => $task,
         ]);
@@ -72,55 +63,37 @@ class TaskController extends AbstractController
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): Response
+    public function createAction(Request $request, EntityManagerInterface $em, TaskService $taskService): Response
     {
-        if ($request->getMethod() === 'GET'){
-            $categories = $em->getRepository(Category::class)->findAll();
+        if ($request->getMethod() === 'GET') {
+            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
 
             return $this->render('checklist/create.html.twig', [
                 'categories' => $categories
             ]);
         }
 
-        $title = (string) $request->request->get('title');
-        $text = (string) $request->request->get('text');
-        $categoryId = (int) $request->request->get('category_id');
-        $category = $em->getRepository(Category::class)->find($categoryId);
-        if (!$category){
-            throw new NotFoundHttpException('Category not found');
-        }
+        $taskService->createAndFlush(
+            (string) $request->request->get('title'),
+            (string) $request->request->get('text'),
+            (int) $request->request->get('category_id'),
+            $this->getUser()
+        );
 
-        $task = new Task($title, $text, $category);
-
-        /** @var ConstraintViolationList $errors */
-        $errors = $validator->validate($task);
-        foreach ($errors as $error){
-            $this->addFlash(FlashMessagesEnum::FAIL, $error->getMessage());
-        }
-
-        if (!$errors->count()) {
-            $em->persist($task);
-            $em->flush();
-
-            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" added', $task->getTitle()));
-        }
         return $this->redirectToRoute('checklist_create');
-
     }
 
     /**
      * @Route("/delete/{id}", name="delete")
+     *
+     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
      */
-    public function deleteAction(int $id, EntityManagerInterface $em): Response
+    public function deleteAction(Task $task, EntityManagerInterface $em): Response
     {
-        $taskToDelete = $this->taskRepository->find($id);
-        if (!$taskToDelete){
-            throw new NotFoundHttpException('Task was not found');
-        }
-        $em->remove($taskToDelete);
+        $em->remove($task);
         $em->flush();
 
-        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $taskToDelete->getTitle()));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));
 
         return $this->redirectToRoute('checklist_all');
     }

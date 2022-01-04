@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Model\Ownable;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=CategoryRepository::class)
  */
-class Category
+class Category implements Ownable
 {
     /**
      * @ORM\Id
@@ -41,9 +43,16 @@ class Category
      */
     private Collection $tasks;
 
-    public function __construct(string $title)
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private UserInterface $user;
+
+    public function __construct(string $title, UserInterface $user)
     {
         $this->title = $title;
+        $this->user = $user;
         $this->tasks = new ArrayCollection();
     }
 
@@ -93,6 +102,18 @@ class Category
                 $task->setCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
+
+    public function setUser(UserInterface $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
