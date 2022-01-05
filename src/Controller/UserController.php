@@ -28,6 +28,7 @@ class UserController extends AbstractController
         $userService->createAndFlush(
             (string) $request->request->get('password'),
             (string) $request->request->get('username'));
+        $this->addFlash(FlashMessagesEnum::SUCCESS, "You have been registered!");
 
         return $this->redirectToRoute('page_home');
     }
