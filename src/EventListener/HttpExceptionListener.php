@@ -12,13 +12,16 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class HttpExceptionListener
 {
-    public function onKernelException(ExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
         $request = $event->getRequest();
         $session = $request->getSession();
 
-        $response = new RedirectResponse('/');
+        if (!$refererUrl = $request->headers->get('referer')) {
+            $refererUrl = '/';
+        }
+        $response = new RedirectResponse($refererUrl);
 
         if ($exception instanceof HttpExceptionInterface) {
             $failureMessage = $exception->getMessage();
@@ -31,5 +34,4 @@ class HttpExceptionListener
         $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $failureMessage);
         $event->setResponse($response);
     }
-
 }
