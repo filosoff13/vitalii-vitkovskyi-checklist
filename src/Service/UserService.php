@@ -72,7 +72,7 @@ class UserService
     {
         $userErrors = $this->validator->validate($user);
         foreach ($userErrors as $error) {
-            throw new \HttpException(400, $error->getMessage());
+            throw new HttpException(400, $error->getMessage());
         }
     }
 
