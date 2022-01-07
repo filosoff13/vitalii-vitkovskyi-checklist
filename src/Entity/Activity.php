@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\ActivityRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -17,32 +18,53 @@ class Activity
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="string", length=10)
      */
-    private $method;
+    private string $method;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $url;
+    private string $url;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private $user;
+    private ?User $user;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    private DateTime $createdAt;
 
     /**
      * @ORM\Column(type="string", length=45, nullable=true)
      */
-    private $ip;
+    private ?string $ip;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private int $statusCode;
+
+    public function __construct(
+        string $method,
+        string $url,
+        DateTime $createdAt,
+        int $statusCode,
+        string $ip = null,
+        User $user = null
+    ) {
+        $this->method = $method;
+        $this->url = $url;
+        $this->user = $user;
+        $this->createdAt = $createdAt;
+        $this->ip = $ip;
+        $this->statusCode = $statusCode;
+    }
 
     public function getId(): ?int
     {
@@ -105,6 +127,18 @@ class Activity
     public function setIp(?string $ip): self
     {
         $this->ip = $ip;
+
+        return $this;
+    }
+
+    public function getStatusCode(): ?int
+    {
+        return $this->statusCode;
+    }
+
+    public function setStatusCode(int $statusCode): self
+    {
+        $this->statusCode = $statusCode;
 
         return $this;
     }
