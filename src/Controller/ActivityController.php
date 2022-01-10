@@ -21,10 +21,21 @@ class ActivityController extends AbstractController
      * @Route("/visit", name="visit")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function index(EntityManagerInterface $em): Response
+    public function visit(EntityManagerInterface $em): Response
     {
         return $this->render('activity/visit.html.twig', [
             'data' => $em->getRepository(Activity::class)->getVisitActivityData()
+        ]);
+    }
+
+    /**
+     * @Route("/task", name="task")
+     * @IsGranted("ROLE_USER")
+     */
+    public function task(EntityManagerInterface $em): Response
+    {
+        return $this->render('activity/task.html.twig', [
+            'data' => $em->getRepository(Activity::class)->getTaskActivityData($this->getUser())
         ]);
     }
 }

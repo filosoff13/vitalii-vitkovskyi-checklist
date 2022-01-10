@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Activity\Activity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method Activity|null find($id, $lockMode = null, $lockVersion = null)
@@ -25,9 +26,38 @@ class ActivityRepository extends ServiceEntityRepository
     {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = 'SELECT * FROM activity';
+        $sql = '
+            SELECT * FROM activity
+            WHERE type = :type 
+            ';
         $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery([
+            'type' => 'visit'
+        ]);
 
-        return $stmt->executeQuery()->fetchAllAssociative();
+        return $result->fetchAllAssociative();
+    }
+
+    public function getTaskActivityData(UserInterface $user): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $stmt = $connection->prepare('
+             SELECT activity.created_at AS created_at,
+             task.title AS task_name
+
+             FROM activity
+
+             JOIN task ON task.id = activity.task_id
+            
+             WHERE type = :type
+             AND activity.user_id = :user
+         ');
+
+        $result = $stmt->executeQuery([
+           'type' => 'edit_task',
+           'user' => $user->getId()
+        ]);
+
+        return $result->fetchAllAssociative();
     }
 }
