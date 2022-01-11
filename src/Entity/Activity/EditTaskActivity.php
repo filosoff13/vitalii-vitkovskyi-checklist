@@ -14,7 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 class EditTaskActivity extends Activity
 {
     /**
-     * @ORM\ManyToOne(targetEntity=App\Entity\Task::class)
+     * @ORM\ManyToOne(targetEntity=Task::class)
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private Task $task;
 
