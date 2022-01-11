@@ -28,7 +28,7 @@ class TaskController extends AbstractController
     public function ListAll(EntityManagerInterface $em): Response
     {
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $em->getRepository(Task::class)->findBy(['user' => $this->getUser()]),
+            'tasks' => $em->getRepository(Task::class)->findByUser($this->getUser()),
         ]);
     }
 
@@ -39,10 +39,7 @@ class TaskController extends AbstractController
      */
     public function listByCategory(Category $category, EntityManagerInterface $em): Response
     {
-        $tasks = $em->getRepository(Task::class)->findBy([
-            'category' => $category,
-            'user' => $this->getUser()
-        ]);
+        $tasks = $em->getRepository(Task::class)->findByCategoryAndUser($category, $this->getUser());
         return $this->render('checklist/index.html.twig', [
             'tasks' => $tasks,
         ]);
