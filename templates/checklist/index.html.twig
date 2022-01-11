@@ -14,7 +14,9 @@
                 {% else %}
                 <button type="button" class="btn btn-danger">Don't done</button>
                 {% endif %}
-                <button>Edit</button>
+                <a class="btn btn-primary btn-outline-warning" href="{{ path('checklist_edit', {'id': task.id}) }}" role="button">
+                    Edit
+                </a>
                 <a class="btn btn-outline-danger" href="{{ path('checklist_delete', {'id': task.id}) }}" role="button">
                     Delete
                 </a>

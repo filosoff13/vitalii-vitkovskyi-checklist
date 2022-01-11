@@ -99,5 +99,31 @@ class TaskController extends AbstractController
 
         return $this->redirectToRoute('checklist_all');
     }
+
+    /**
+     * @Route("/edit/{id}", name="edit", methods={"GET", "POST"})
+     */
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
+    {
+        if ($request->getMethod() === 'GET') {
+            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
+
+            return $this->render('checklist/edit.html.twig', [
+                'task' => $task,
+                'categories' => $categories
+            ]);
+        }
+
+        $title = (string) $request->request->get('title');
+        $taskService->editAndFlush(
+            $task,
+            $title,
+            (string) $request->request->get('text'),
+            (int) $request->request->get('category_id')
+        );
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $title));
+
+        return $this->redirectToRoute('checklist_get', ['id' => $task->getId()]);
+    }
 }
 
