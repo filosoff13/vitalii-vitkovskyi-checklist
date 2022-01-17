@@ -33,6 +33,20 @@ class UserController extends AbstractController
     }
 
     /**
+     * @Route("/list", name="list", methods={"GET"})
+     *
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function list(Request $request, UserService $userService): Response
+    {
+        $users = $userService->getUserList();
+
+        return $this->render('user/index.html.twig', [
+            'users' => $users,
+        ]);
+    }
+
+    /**
      * @Route("/login", name="login")
      *
      * @IsGranted("IS_ANONYMOUS_USER")
@@ -58,3 +72,4 @@ class UserController extends AbstractController
         throw new \Exception('Unreachable statement');
     }
 }
+

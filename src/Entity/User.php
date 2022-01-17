@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\RolesEnum;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -12,7 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @UniqueEntity("username")
+ * @UniqueEntity("username", message="User with such name already exists")
  *
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
@@ -85,16 +86,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->username;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = RolesEnum::USER;
 
         return array_unique($roles);
+    }
+
+    public function addRole($role): self
+    {
+        $this->roles[] = $role;
+
+        return $this;
     }
 
     public function setRoles(array $roles): self
@@ -139,3 +144,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 }
+
