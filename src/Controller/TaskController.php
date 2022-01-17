@@ -73,12 +73,14 @@ class TaskController extends AbstractController
             ]);
         }
 
+        $title = (string) $request->request->get('title');
         $taskService->createAndFlush(
-            (string) $request->request->get('title'),
+            $title,
             (string) $request->request->get('text'),
             (int) $request->request->get('category_id'),
             $this->getUser()
         );
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $title));
 
         return $this->redirectToRoute('checklist_create');
     }
