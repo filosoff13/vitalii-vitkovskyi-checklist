@@ -2,7 +2,7 @@
 
 namespace App\Model\Animal;
 
-class Lion extends Felidae
+class Lion extends Felidae implements WildAnimal
 {
 
 }
