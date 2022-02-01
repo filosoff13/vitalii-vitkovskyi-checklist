@@ -6,12 +6,14 @@ namespace App\Entity;
 
 use App\Model\Ownable;
 use App\Repository\TaskRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass=TaskRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\TaskRepository")
  */
 class Task implements Ownable
 {
@@ -67,18 +69,26 @@ class Task implements Ownable
     private Category $category;
 
     /**
+     * @ORM\ManyToMany(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private Collection $users;
+
+    /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private UserInterface $user;
+    private UserInterface $owner;
 
-    public function __construct(string $title, string $text, Category $category, UserInterface $user, bool $done = false)
+    public function __construct(string $title, string $text, Category $category, UserInterface $owner, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
         $this->category = $category;
-        $this->user = $user;
+        $this->owner = $owner;
         $this->done = $done;
+        $this->users = new ArrayCollection();
+        $this->users->add($owner);
     }
 
     public function getId(): ?int
@@ -144,15 +154,31 @@ class Task implements Ownable
         return $this;
     }
 
-    public function getUser(): UserInterface
+    public function getUsers(): Collection
     {
-        return $this->user;
+        return $this->users;
     }
 
-    public function setUser(UserInterface $user): self
+    public function setUsers(Collection $users): self
     {
-        $this->user = $user;
+        $this->users = $users;
 
         return $this;
+    }
+
+    public function getOwner(): UserInterface
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(UserInterface $owner): Task
+    {
+        $this->owner = $owner;
+        return $this;
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->getOwner();
     }
 }

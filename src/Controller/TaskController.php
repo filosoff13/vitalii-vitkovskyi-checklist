@@ -28,7 +28,7 @@ class TaskController extends AbstractController
     public function ListAll(EntityManagerInterface $em): Response
     {
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $em->getRepository(Task::class)->findBy(['user' => $this->getUser()]),
+            'tasks' => $em->getRepository(Task::class)->findByUser($this->getUser()),
         ]);
     }
 
@@ -39,10 +39,7 @@ class TaskController extends AbstractController
      */
     public function listByCategory(Category $category, EntityManagerInterface $em): Response
     {
-        $tasks = $em->getRepository(Task::class)->findBy([
-            'category' => $category,
-            'user' => $this->getUser()
-        ]);
+        $tasks = $em->getRepository(Task::class)->findByCategoryAndUser($category, $this->getUser());
         return $this->render('checklist/index.html.twig', [
             'tasks' => $tasks,
         ]);
@@ -98,6 +95,32 @@ class TaskController extends AbstractController
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));
 
         return $this->redirectToRoute('checklist_all');
+    }
+
+    /**
+     * @Route("/edit/{id}", name="edit", methods={"GET", "POST"})
+     */
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
+    {
+        if ($request->getMethod() === 'GET') {
+            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
+
+            return $this->render('checklist/edit.html.twig', [
+                'task' => $task,
+                'categories' => $categories
+            ]);
+        }
+
+        $title = (string) $request->request->get('title');
+        $taskService->editAndFlush(
+            $task,
+            $title,
+            (string) $request->request->get('text'),
+            (int) $request->request->get('category_id')
+        );
+        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $title));
+
+        return $this->redirectToRoute('checklist_get', ['id' => $task->getId()]);
     }
 }
 

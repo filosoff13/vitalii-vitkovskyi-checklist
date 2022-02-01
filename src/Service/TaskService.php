@@ -33,15 +33,34 @@ class TaskService
             throw new NotFoundHttpException('Category not found');
         }
 
-        $note = new Task($title, $text, $category, $user);
+        $task = new Task($title, $text, $category, $user);
 
         /** @var ConstraintViolationList $errors */
-        $errors = $this->validator->validate($note);
+        $errors = $this->validator->validate($task);
         foreach ($errors as $error) {
             throw new HttpException(400, $error->getMessage());
         }
 
-        $this->em->persist($note);
+        $this->em->persist($task);
+        $this->em->flush();
+    }
+
+    public function editAndFlush(Task $task, string $title, string $text, int $categoryId): void
+    {
+        $category = $this->em->getRepository(Category::class)->findOneBy(['id' => $categoryId, 'user' => $task->getUser()]);
+        if (!$category) {
+            throw new NotFoundHttpException('Category not found');
+        }
+
+        $task->setTitle($title)->setText($text)->setCategory($category);
+
+        /** @var ConstraintViolationList $errors */
+        $errors = $this->validator->validate($task);
+        foreach ($errors as $error) {
+            throw new HttpException(400, $error->getMessage());
+        }
+
+        $this->em->persist($task);
         $this->em->flush();
     }
 }
