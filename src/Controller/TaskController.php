@@ -86,7 +86,7 @@ class TaskController extends AbstractController
     /**
      * @Route("/new", name="new", methods={"GET", "POST"})
      */
-    public function newAction(Request $request, EntityManagerInterface $em, TaskService $taskService): Response
+    public function newAction(Request $request, EntityManagerInterface $em): Response
     {
         $category = $em->getRepository(Category::class)->findBy(
             ['user' => $this->getUser()]
@@ -94,6 +94,17 @@ class TaskController extends AbstractController
         $task = new Task('', '', $category[0], $this->getUser());
 
         $form = $this->createForm(TaskType::class, $task);
+
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($task);
+            $em->flush();
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));
+
+            return $this->redirectToRoute('checklist_all');
+        }
 
         return $this->renderForm('checklist/new.html.twig', [
             'form' => $form,
