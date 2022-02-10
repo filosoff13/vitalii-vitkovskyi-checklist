@@ -29,6 +29,7 @@ class ActivityRepository extends ServiceEntityRepository
         $sql = '
             SELECT * FROM activity
             WHERE type = :type 
+            ORDER BY created_at DESC
             ';
         $stmt = $conn->prepare($sql);
         $result = $stmt->executeQuery([
@@ -50,7 +51,8 @@ class ActivityRepository extends ServiceEntityRepository
              JOIN task ON task.id = activity.task_id
             
              WHERE type = :type
-             AND activity.user_id = :user
+             AND activity.user_id = :user 
+             ORDER BY created_at DESC
          ');
 
         $result = $stmt->executeQuery([
