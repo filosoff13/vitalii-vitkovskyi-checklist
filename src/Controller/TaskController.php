@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
+use App\Form\TaskType;
 use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -80,6 +81,23 @@ class TaskController extends AbstractController
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $title));
 
         return $this->redirectToRoute('checklist_create');
+    }
+
+    /**
+     * @Route("/new", name="new", methods={"GET", "POST"})
+     */
+    public function newAction(Request $request, EntityManagerInterface $em, TaskService $taskService): Response
+    {
+        $category = $em->getRepository(Category::class)->findBy(
+            ['user' => $this->getUser()]
+        );
+        $task = new Task('', '', $category[0], $this->getUser());
+
+        $form = $this->createForm(TaskType::class, $task);
+
+        return $this->renderForm('checklist/new.html.twig', [
+            'form' => $form,
+            ]);
     }
 
     /**
