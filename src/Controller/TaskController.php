@@ -95,8 +95,6 @@ class TaskController extends AbstractController
 
         $form = $this->createForm(TaskType::class, $task);
 
-        $form = $this->createForm(TaskType::class, $task);
-
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($task);
@@ -150,6 +148,28 @@ class TaskController extends AbstractController
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $title));
 
         return $this->redirectToRoute('checklist_get', ['id' => $task->getId()]);
+    }
+
+    /**
+     * @Route("/change/{id}", name="change", methods={"GET", "POST"})
+     */
+    public function changeAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
+    {
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $task->getTitle()));
+
+            return $this->renderForm('checklist/change.html.twig', [
+                'form' => $form,
+            ]);
+        }
+
+        return $this->renderForm('checklist/change.html.twig', [
+            'form' => $form,
+        ]);
     }
 }
 
