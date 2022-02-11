@@ -26,14 +26,14 @@ class TaskService
         $this->em = $em;
     }
 
-    public function createAndFlush(string $title, string $text, int $categoryId, UserInterface $user): void
+    public function createAndFlush(string $title, string $text, int $categoryId): void
     {
-        $category = $this->em->getRepository(Category::class)->findOneBy(['id' => $categoryId, 'user' => $user]);
+        $category = $this->em->getRepository(Category::class)->findOneBy(['id' => $categoryId]);
         if (!$category) {
             throw new NotFoundHttpException('Category not found');
         }
 
-        $task = new Task($title, $text, $category, $user);
+        $task = new Task($title, $text, $category);
 
         /** @var ConstraintViolationList $errors */
         $errors = $this->validator->validate($task);

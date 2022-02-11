@@ -75,8 +75,7 @@ class TaskController extends AbstractController
         $taskService->createAndFlush(
             $title,
             (string) $request->request->get('text'),
-            (int) $request->request->get('category_id'),
-            $this->getUser()
+            (int) $request->request->get('category_id')
         );
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $title));
 
@@ -88,15 +87,11 @@ class TaskController extends AbstractController
      */
     public function newAction(Request $request, EntityManagerInterface $em): Response
     {
-        $category = $em->getRepository(Category::class)->findBy(
-            ['user' => $this->getUser()]
-        );
-        $task = new Task('', '', $category[0], $this->getUser());
-
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $task = $form->getData();
             $em->persist($task);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));

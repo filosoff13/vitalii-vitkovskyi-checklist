@@ -6,11 +6,11 @@ namespace App\Form;
 
 use App\Entity\Task;
 use App\Repository\CategoryRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -37,9 +37,7 @@ class TaskType extends AbstractType
             ])
             ->add('users', null, [
                 'choice_label' => 'username',
-            ])
-            ->add('owner', null, [
-                'choice_label' => 'username',
+                'label' => 'Shared user'
             ])
             ->add('save', SubmitType::class)
         ;
@@ -49,6 +47,13 @@ class TaskType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Task::class,
+            'empty_data' => static function (FormInterface $form) {
+                return new Task(
+                    $form->get('title')->getData(),
+                    $form->get('text')->getData(),
+                    $form->get('category')->getData()
+                );
+            },
         ]);
     }
 
