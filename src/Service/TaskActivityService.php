@@ -22,7 +22,7 @@ class TaskActivityService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function createNoteEditActivity(Task $task)
+    public function createNoteEditActivity(Task $task, array $changes)
     {
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
 
@@ -30,7 +30,7 @@ class TaskActivityService
             throw new HttpException(400, 'User not exists in request');
         }
 
-        $activity = new EditTaskActivity($user, $task);
+        $activity = new EditTaskActivity($user, $task, $changes);
 
         $this->em->persist($activity);
         $this->em->flush();

@@ -19,9 +19,15 @@ class EditTaskActivity extends Activity
      */
     private Task $task;
 
-    public function __construct(User $user, Task $task) {
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private array $changes = [];
+
+    public function __construct(User $user, Task $task, array $changes) {
         parent::__construct($user);
         $this->task = $task;
+        $this->changes = $changes;
     }
 
     public function getTask(): Task
@@ -32,6 +38,18 @@ class EditTaskActivity extends Activity
     public function setNote(Task $task): self
     {
         $this->task = $task;
+
+        return $this;
+    }
+
+    public function getChanges(): ?array
+    {
+        return $this->changes;
+    }
+
+    public function setChanges(?array $changes): self
+    {
+        $this->changes = $changes;
 
         return $this;
     }
