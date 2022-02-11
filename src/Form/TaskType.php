@@ -39,7 +39,6 @@ class TaskType extends AbstractType
                 'choice_label' => 'username',
                 'label' => 'Shared user'
             ])
-            ->add('save', SubmitType::class)
         ;
     }
 
