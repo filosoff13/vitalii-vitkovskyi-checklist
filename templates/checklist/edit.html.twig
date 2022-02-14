@@ -3,14 +3,9 @@
 {% block title %}Change task "{{ task.title }}"{% endblock %}
 
 {% block body %}
-{#    {{ form(form()) }}#}
-
 <div class="card">
     <h5 class="card-header">Edit "{{ task.title }}" task</h5>
     <div class="card-body">
-{#    {{ form_start(form) }}#}
-{#        {{ form_widget(form) }}#}
-{#    {{ form_end(form) }}#}
         {{ form_start(form) }}
         {{ form_errors(form) }}
         {{ form_help(form) }}
