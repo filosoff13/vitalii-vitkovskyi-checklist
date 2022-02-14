@@ -32,7 +32,7 @@ class TaskType extends AbstractType
             ->add('category', null, [
                 'choice_label' => 'title',
                 'query_builder' => function (CategoryRepository $categoryRepository) {
-                    return $categoryRepository->selectByUser($this->getUser($this->getUser()));
+                    return $categoryRepository->selectByUser($this->getUser());
                 },
             ])
             ->add('users', null, [

@@ -22,7 +22,7 @@ class TaskActivityService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function createNoteEditActivity(Task $task)
+    public function createNoteEditActivity(Task $task): void
     {
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
 
