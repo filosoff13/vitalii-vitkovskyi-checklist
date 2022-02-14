@@ -22,7 +22,7 @@ class EditTaskActivity extends Activity
     /**
      * @ORM\Column(type="json", nullable=true)
      */
-    private array $changes = [];
+    private $changes = [];
 
     public function __construct(User $user, Task $task, array $changes) {
         parent::__construct($user);
