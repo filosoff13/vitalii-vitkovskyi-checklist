@@ -19,14 +19,10 @@
             <tr>
                 <td>{{ item.createdAt|date("Y-m-d h:m:s") }}</td>
                 <td>{{ item.user ? item.user.username : '-' }}</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-{#                <td class="brake-word">{{ item.url }}</td>#}
-{#                <td>{{ item.method }}</td>#}
-{#                <td>{{ item.ip }}</td>#}
-{#                <td>{{ item.status_code }}</td>#}
+                <td class="brake-word">{{ item.url }}</td>
+                <td>{{ item.method }}</td>
+                <td>{{ item.ip }}</td>
+                <td>{{ item.statusCode }}</td>
             </tr>
         {% endfor %}
         </tbody>
