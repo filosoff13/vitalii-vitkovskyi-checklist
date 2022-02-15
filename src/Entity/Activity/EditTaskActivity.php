@@ -42,12 +42,12 @@ class EditTaskActivity extends Activity
         return $this;
     }
 
-    public function getChanges(): ?array
+    public function getChanges(): array
     {
         return $this->changes;
     }
 
-    public function setChanges(?array $changes): self
+    public function setChanges(array $changes): self
     {
         $this->changes = $changes;
 
