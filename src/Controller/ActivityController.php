@@ -18,30 +18,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class ActivityController extends AbstractController
 {
     /**
-     * @Route("/visit-qb", name="visit-qb")
+     * @Route("/visit", name="visit")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function visitQB(EntityManagerInterface $em, Request $request): Response
+    public function visit(EntityManagerInterface $em, Request $request): Response
     {
         $itemsPerPage = 20;
         $page = (int) $request->get('page');
         $offset = ($page ? $page - 1 : 0) * $itemsPerPage;
 
-        return $this->render('activity/visitQB.html.twig', [
+        return $this->render('activity/visit.html.twig', [
             'activities' => $em->getRepository(Activity::class)->getVisitActivityDataQB(),
             'offset' => $offset,
             'itemsPerPage' => $itemsPerPage
-        ]);
-    }
-
-    /**
-     * @Route("/visit", name="visit")
-     * @IsGranted("ROLE_ADMIN")
-     */
-    public function visit(EntityManagerInterface $em): Response
-    {
-        return $this->render('activity/visit.html.twig', [
-            'data' => $em->getRepository(Activity::class)->getVisitActivityData()
         ]);
     }
 

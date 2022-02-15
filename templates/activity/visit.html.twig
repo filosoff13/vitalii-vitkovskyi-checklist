@@ -15,16 +15,26 @@
         </tr>
         </thead>
         <tbody>
-        {% for item in data %}
+        {% for item in activities %}
             <tr>
-                <td>{{ item.created_at }}</td>
-                <td>{{ item.user_id }}</td>
+                <td>{{ item.createdAt|date("Y-m-d h:m:s") }}</td>
+                <td>{{ item.user ? item.user.username : '-' }}</td>
                 <td class="brake-word">{{ item.url }}</td>
                 <td>{{ item.method }}</td>
                 <td>{{ item.ip }}</td>
-                <td>{{ item.status_code }}</td>
+                <td>{{ item.statusCode }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="{{ path('activity_visit', {page:1}) }}">1</a></li>
+            <li class="page-item"><a class="page-link" href="{{ path('activity_visit', {page:2}) }}">2</a></li>
+            <li class="page-item"><a class="page-link" href="{{ path('activity_visit', {page:3}) }}">3</a></li>
+            <li class="page-item"><a class="page-link" href="{{ path('activity_visit', {page:4}) }}">4</a></li>
+            <li class="page-item"><a class="page-link" href="{{ path('activity_visit', {page:5}) }}">5</a></li>
+
+        </ul>
+    </nav>
 {% endblock %}
