@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
+use App\Form\TaskType;
 use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -83,6 +84,32 @@ class TaskController extends AbstractController
     }
 
     /**
+     * @Route("/new", name="new", methods={"GET", "POST"})
+     */
+    public function newAction(Request $request, EntityManagerInterface $em): Response
+    {
+        $category = $em->getRepository(Category::class)->findBy(
+            ['user' => $this->getUser()]
+        );
+        $task = new Task('', '', $category[0], $this->getUser());
+
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($task);
+            $em->flush();
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));
+
+            return $this->redirectToRoute('checklist_all');
+        }
+
+        return $this->renderForm('checklist/new.html.twig', [
+            'form' => $form,
+            ]);
+    }
+
+    /**
      * @Route("/delete/{id}", name="delete")
      *
      * @IsGranted("IS_OWNER", subject="task", statusCode=404)
@@ -121,6 +148,28 @@ class TaskController extends AbstractController
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $title));
 
         return $this->redirectToRoute('checklist_get', ['id' => $task->getId()]);
+    }
+
+    /**
+     * @Route("/change/{id}", name="change", methods={"GET", "POST"})
+     */
+    public function changeAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
+    {
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $task->getTitle()));
+
+            return $this->renderForm('checklist/change.html.twig', [
+                'form' => $form,
+            ]);
+        }
+
+        return $this->renderForm('checklist/change.html.twig', [
+            'form' => $form,
+        ]);
     }
 }
 
