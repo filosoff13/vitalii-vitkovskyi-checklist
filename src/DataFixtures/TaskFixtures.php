@@ -37,7 +37,8 @@ class TaskFixtures extends Fixture
         $categories = [];
 
         for ($i = 0; $i < 3; $i++){
-            $category = new Category($this->categoryTitles[$i], $users[$i]);
+            $category = new Category($this->categoryTitles[$i]);
+            $category->setUser($users[$i]);
             $manager->persist($category);
             $categories[] = $category;
         }
@@ -45,7 +46,8 @@ class TaskFixtures extends Fixture
         for ($i = 1; $i < 10; $i++){
             $category = $categories[random_int(0, 2)];
 
-            $task = new Task('Some task ' . $i, 'Text ' . $i, $category, $category->getUser());
+            $task = new Task('Some task ' . $i, 'Text ' . $i, $category);
+            $task->setUser($category->getUser());
             $manager->persist($task);
         }
 

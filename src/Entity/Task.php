@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Model\Ownable;
-use App\Repository\TaskRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -80,15 +79,13 @@ class Task implements Ownable
      */
     private UserInterface $owner;
 
-    public function __construct(string $title, string $text, Category $category, UserInterface $owner, bool $done = false)
+    public function __construct(string $title, string $text, Category $category, bool $done = false)
     {
         $this->title = $title;
         $this->text = $text;
         $this->category = $category;
-        $this->owner = $owner;
         $this->done = $done;
         $this->users = new ArrayCollection();
-        $this->users->add($owner);
     }
 
     public function getId(): ?int
@@ -180,5 +177,11 @@ class Task implements Ownable
     public function getUser(): UserInterface
     {
         return $this->getOwner();
+    }
+
+    public function setUser(UserInterface $user)
+    {
+        $this->owner = $user;
+        $this->users->add($user);
     }
 }

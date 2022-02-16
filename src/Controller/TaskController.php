@@ -61,42 +61,13 @@ class TaskController extends AbstractController
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(Request $request, EntityManagerInterface $em, TaskService $taskService): Response
+    public function createAction(Request $request, EntityManagerInterface $em): Response
     {
-        if ($request->getMethod() === 'GET') {
-            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
-
-            return $this->render('checklist/create.html.twig', [
-                'categories' => $categories
-            ]);
-        }
-
-        $title = (string) $request->request->get('title');
-        $taskService->createAndFlush(
-            $title,
-            (string) $request->request->get('text'),
-            (int) $request->request->get('category_id'),
-            $this->getUser()
-        );
-        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $title));
-
-        return $this->redirectToRoute('checklist_create');
-    }
-
-    /**
-     * @Route("/new", name="new", methods={"GET", "POST"})
-     */
-    public function newAction(Request $request, EntityManagerInterface $em): Response
-    {
-        $category = $em->getRepository(Category::class)->findBy(
-            ['user' => $this->getUser()]
-        );
-        $task = new Task('', '', $category[0], $this->getUser());
-
-        $form = $this->createForm(TaskType::class, $task);
+        $form = $this->createForm(TaskType::class);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $task = $form->getData();
             $em->persist($task);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));
@@ -104,7 +75,7 @@ class TaskController extends AbstractController
             return $this->redirectToRoute('checklist_all');
         }
 
-        return $this->renderForm('checklist/new.html.twig', [
+        return $this->renderForm('checklist/create.html.twig', [
             'form' => $form,
             ]);
     }
@@ -127,33 +98,7 @@ class TaskController extends AbstractController
     /**
      * @Route("/edit/{id}", name="edit", methods={"GET", "POST"})
      */
-    public function editAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
-    {
-        if ($request->getMethod() === 'GET') {
-            $categories = $em->getRepository(Category::class)->findBy(['user' => $this->getUser()]);
-
-            return $this->render('checklist/edit.html.twig', [
-                'task' => $task,
-                'categories' => $categories
-            ]);
-        }
-
-        $title = (string) $request->request->get('title');
-        $taskService->editAndFlush(
-            $task,
-            $title,
-            (string) $request->request->get('text'),
-            (int) $request->request->get('category_id')
-        );
-        $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $title));
-
-        return $this->redirectToRoute('checklist_get', ['id' => $task->getId()]);
-    }
-
-    /**
-     * @Route("/change/{id}", name="change", methods={"GET", "POST"})
-     */
-    public function changeAction(Request $request, Task $task, EntityManagerInterface $em, TaskService $taskService): Response
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(TaskType::class, $task);
 
@@ -162,13 +107,15 @@ class TaskController extends AbstractController
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $task->getTitle()));
 
-            return $this->renderForm('checklist/change.html.twig', [
+            return $this->renderForm('checklist/edit.html.twig', [
                 'form' => $form,
+                'task' => $task,
             ]);
         }
 
-        return $this->renderForm('checklist/change.html.twig', [
+        return $this->renderForm('checklist/edit.html.twig', [
             'form' => $form,
+            'task' => $task,
         ]);
     }
 }
