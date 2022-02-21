@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Activity\Activity;
-use App\Entity\Activity\VisitActivity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -24,20 +24,13 @@ class ActivityRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $offset
-     * @param int $itemsPerPage
-     *
-     * @return VisitActivity[]
+     * @return QueryBuilder
      */
-    public function getVisitActivityData(int $offset = 0, int $itemsPerPage = 20): array
+    public function selectVisitActivityData(): QueryBuilder
     {
         return $this->createQueryBuilder('activity')
             ->orderBy('activity.createdAt', 'DESC')
-            ->setMaxResults($itemsPerPage)
-            ->setFirstResult($offset)
-            ->where('activity INSTANCE OF App\Entity\Activity\VisitActivity')
-            ->getQuery()
-            ->getResult();
+            ->where('activity INSTANCE OF App\Entity\Activity\VisitActivity');
     }
 
     public function getTaskActivityData(UserInterface $user): array

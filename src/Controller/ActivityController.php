@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Activity\Activity;
+use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,20 +18,27 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ActivityController extends AbstractController
 {
+    private PaginationService $paginationService;
+
+    public function __construct(PaginationService $paginationService)
+    {
+        $this->paginationService = $paginationService;
+    }
+
     /**
      * @Route("/visit", name="visit")
      * @IsGranted("ROLE_ADMIN")
      */
     public function visit(EntityManagerInterface $em, Request $request): Response
     {
-        $itemsPerPage = 20;
-        $page = (int) $request->get('page');
-        $offset = ($page ? $page - 1 : 0) * $itemsPerPage;
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Activity::class)->selectVisitActivityData(),
+            $request
+        );
 
         return $this->render('activity/visit.html.twig', [
-            'activities' => $em->getRepository(Activity::class)->getVisitActivityData(),
-            'offset' => $offset,
-            'itemsPerPage' => $itemsPerPage
+            'activities' => $data,
+            'lastPage' => $this->paginationService->lastPage($data)
         ]);
     }
 
@@ -41,7 +49,8 @@ class ActivityController extends AbstractController
     public function task(EntityManagerInterface $em): Response
     {
         return $this->render('activity/task.html.twig', [
-            'data' => $em->getRepository(Activity::class)->getTaskActivityData($this->getUser())
+            'data' => $em->getRepository(Activity::class)->getTaskActivityData($this->getUser()),
+            'lastPage' => 100
         ]);
     }
 }
