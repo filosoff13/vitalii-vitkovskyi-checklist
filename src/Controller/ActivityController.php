@@ -46,11 +46,17 @@ class ActivityController extends AbstractController
      * @Route("/task", name="task")
      * @IsGranted("ROLE_USER")
      */
-    public function task(EntityManagerInterface $em): Response
+    public function task(EntityManagerInterface $em, Request $request): Response
     {
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Activity::class)->selectTaskActivityData($this->getUser()),
+            $request,
+            2
+        );
+
         return $this->render('activity/task.html.twig', [
-            'data' => $em->getRepository(Activity::class)->getTaskActivityData($this->getUser()),
-            'lastPage' => 100
+            'data' => $data,
+            'lastPage' => $this->paginationService->lastPage($data),
         ]);
     }
 }
