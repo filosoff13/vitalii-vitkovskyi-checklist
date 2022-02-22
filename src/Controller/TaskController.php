@@ -8,7 +8,6 @@ use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
-use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -89,7 +88,7 @@ class TaskController extends AbstractController
     {
         if ($this->getUser() === $task->getUser()){
             $em->remove($task);
-        }else{
+        } else {
             $task->getUsers()->removeElement($this->getUser());
         }
 

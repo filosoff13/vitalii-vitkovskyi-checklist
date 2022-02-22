@@ -28,9 +28,7 @@ class ActivityController extends AbstractController
         $offset = ($page ? $page - 1 : 0) * $itemsPerPage;
 
         return $this->render('activity/visitQB.html.twig', [
-            'activities' => $em->getRepository(Activity::class)->getVisitActivityDataQB(),
-            'offset' => $offset,
-            'itemsPerPage' => $itemsPerPage
+            'activities' => $em->getRepository(Activity::class)->findVisitActivityDataQB($offset, $itemsPerPage),
         ]);
     }
 
