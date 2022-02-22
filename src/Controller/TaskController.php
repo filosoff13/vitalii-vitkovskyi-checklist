@@ -109,7 +109,7 @@ class TaskController extends AbstractController
     {
         if ($this->getUser() === $task->getUser()){
             $em->remove($task);
-        }else{
+        } else {
             $task->getUsers()->removeElement($this->getUser());
         }
 
