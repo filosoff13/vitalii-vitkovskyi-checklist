@@ -8,13 +8,16 @@
         <div class="card-body">
             <p class="card-text">{{ task.text }}</p>
         </div>
-        <div class="card-header">
-            <a class="btn btn-outline-warning float-end" href="{{ path('checklist_edit', {'id': task.id}) }}" role="button">
-                Edit
-            </a>
-            <a class="btn btn-outline-danger float-end" href="{{ path('checklist_delete', {'id': task.id}) }}" role="button">
-                Delete
-            </a>
+        <div class="card-header d-flex justify-content-between">
+            <p class="card-text">Category: {{ task.category.title }}</p>
+            <div>
+                <a class="btn btn-outline-warning float-end" href="{{ path('checklist_edit', {'id': task.id}) }}" role="button">
+                    Edit
+                </a>
+                <a class="btn btn-outline-danger float-end" href="{{ path('checklist_delete', {'id': task.id}) }}" role="button">
+                    Delete
+                </a>
+            </div>
         </div>
     </div>
 {% endblock %}

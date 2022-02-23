@@ -43,6 +43,7 @@ class TaskRepository extends ServiceEntityRepository
             ->select('task')
             ->join('task.users', 'user')
             ->where('user = :user')
+            ->orderBy('task.id', 'DESC')
             ->setParameter(':user', $user);
     }
 }

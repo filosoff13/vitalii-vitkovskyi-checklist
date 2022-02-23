@@ -8,7 +8,6 @@ use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
-use App\Service\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,7 +48,7 @@ class TaskController extends AbstractController
     /**
      * @Route("/{id}", name="get", requirements={"id" = "\d+"})
      *
-     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
+     * @IsGranted("IS_SHARED", subject="task", statusCode=404)
      */
     public function getAction(Task $task): Response
     {
@@ -83,11 +82,16 @@ class TaskController extends AbstractController
     /**
      * @Route("/delete/{id}", name="delete")
      *
-     * @IsGranted("IS_OWNER", subject="task", statusCode=404)
+     * @IsGranted("IS_SHARED", subject="task", statusCode=404)
      */
     public function deleteAction(Task $task, EntityManagerInterface $em): Response
     {
-        $em->remove($task);
+        if ($this->getUser() === $task->getUser()){
+            $em->remove($task);
+        } else {
+            $task->getUsers()->removeElement($this->getUser());
+        }
+
         $em->flush();
 
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));

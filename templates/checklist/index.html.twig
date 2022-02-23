@@ -7,7 +7,12 @@
     {% for task in tasks %}
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">{{ task.title }}</h5>
+                <div class="card-title d-flex justify-content-between">
+                    <h5>{{ task.title }}</h5>
+                    {% if app.user.id != task.user.id %}
+                        <i class="bi bi-link"></i>
+                    {% endif %}
+                </div>
                 <p class="card-text">{{ task.text }}</p>
                 {% if task.done == true %}
                 <button type="button" class="btn btn-success">Done</button>
