@@ -18,8 +18,6 @@ final class Version20220111061647 extends AbstractMigration
         $this->addSql('ALTER TABLE task CHANGE user_id owner_id INT NOT NULL');
         $this->addSql('INSERT INTO task_user(task_id, user_id) SELECT task.id AS task_id, task.owner_id AS user_id FROM task');
 
-        $this->addSql('ALTER TABLE activity ADD CONSTRAINT FK_AC74095A8DB60186 FOREIGN KEY (task_id) REFERENCES task (id)');
-        $this->addSql('CREATE INDEX IDX_AC74095A8DB60186 ON activity (task_id)');
         $this->addSql('ALTER TABLE task RENAME INDEX idx_527edb25a76ed395 TO IDX_527EDB257E3C61F9');
     }
 
@@ -28,8 +26,6 @@ final class Version20220111061647 extends AbstractMigration
         $this->addSql('ALTER TABLE task CHANGE owner_id user_id INT NOT NULL');
         $this->addSql('DROP TABLE task_user');
 
-        $this->addSql('ALTER TABLE activity DROP FOREIGN KEY FK_AC74095A8DB60186');
-        $this->addSql('DROP INDEX IDX_AC74095A8DB60186 ON activity');
         $this->addSql('ALTER TABLE task RENAME INDEX idx_527edb257e3c61f9 TO IDX_527EDB25A76ED395');
     }
 }

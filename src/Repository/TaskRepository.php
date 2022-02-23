@@ -29,15 +29,14 @@ class TaskRepository extends ServiceEntityRepository
         return $this->selectByUser($user)->getQuery()->getResult();
     }
 
-    public function findByCategoryAndUser(Category $category, UserInterface $user): array
+    public function selectByCategoryAndUser(Category $category, UserInterface $user): QueryBuilder
     {
         return $this->selectByUser($user)
             ->andWhere('task.category = :category')
-            ->setParameter(':category', $category)
-            ->getQuery()->getResult();
+            ->setParameter(':category', $category);
     }
 
-    private function selectByUser(UserInterface $user): QueryBuilder
+    public function selectByUser(UserInterface $user): QueryBuilder
     {
         return $this->createQueryBuilder('task')
             ->select('task')

@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Activity\Activity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -22,31 +23,27 @@ class ActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, Activity::class);
     }
 
-    public function getVisitActivityData(): array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = '
-            SELECT * FROM activity
-            WHERE type = :type 
-            ORDER BY created_at DESC
-            ';
-        $stmt = $conn->prepare($sql);
-        $result = $stmt->executeQuery([
-            'type' => 'visit'
-        ]);
-
-        return $result->fetchAllAssociative();
-    }
-
-    public function findVisitActivityDataQB(int $offset = 0, int $itemsPerPage = 20): array
+    /**
+     * @return QueryBuilder
+     */
+    public function selectVisitActivityData(): QueryBuilder
     {
         return $this->createQueryBuilder('activity')
             ->orderBy('activity.createdAt', 'DESC')
-            ->setMaxResults($itemsPerPage)
-            ->setFirstResult($offset)
-            ->getQuery()
-            ->getResult();
+            ->where('activity INSTANCE OF App\Entity\Activity\VisitActivity');
+    }
+
+    /**
+     * @param UserInterface $user
+     * @return QueryBuilder
+     */
+    public function selectTaskActivityData(UserInterface $user): QueryBuilder
+    {
+        return $this->createQueryBuilder('activity')
+            ->orderBy('activity.createdAt', 'DESC')
+            ->where('activity.user =:user')
+            ->andWhere('activity INSTANCE OF App\Entity\Activity\EditTaskActivity')
+            ->setParameter('user', $user);
     }
 
     public function getTaskActivityData(UserInterface $user): array

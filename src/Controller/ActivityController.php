@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Activity\Activity;
+use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,29 +18,27 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ActivityController extends AbstractController
 {
-    /**
-     * @Route("/visit-qb", name="visit-qb")
-     * @IsGranted("ROLE_ADMIN")
-     */
-    public function visitQB(EntityManagerInterface $em, Request $request): Response
-    {
-        $itemsPerPage = 20;
-        $page = (int) $request->get('page');
-        $offset = ($page ? $page - 1 : 0) * $itemsPerPage;
+    private PaginationService $paginationService;
 
-        return $this->render('activity/visitQB.html.twig', [
-            'activities' => $em->getRepository(Activity::class)->findVisitActivityDataQB($offset, $itemsPerPage),
-        ]);
+    public function __construct(PaginationService $paginationService)
+    {
+        $this->paginationService = $paginationService;
     }
 
     /**
      * @Route("/visit", name="visit")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function visit(EntityManagerInterface $em): Response
+    public function visit(EntityManagerInterface $em, Request $request): Response
     {
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Activity::class)->selectVisitActivityData(),
+            $request
+        );
+
         return $this->render('activity/visit.html.twig', [
-            'data' => $em->getRepository(Activity::class)->getVisitActivityData()
+            'activities' => $data,
+            'lastPage' => $this->paginationService->lastPage($data)
         ]);
     }
 
@@ -47,10 +46,17 @@ class ActivityController extends AbstractController
      * @Route("/task", name="task")
      * @IsGranted("ROLE_USER")
      */
-    public function task(EntityManagerInterface $em): Response
+    public function task(EntityManagerInterface $em, Request $request): Response
     {
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Activity::class)->selectTaskActivityData($this->getUser()),
+            $request,
+            2
+        );
+
         return $this->render('activity/task.html.twig', [
-            'data' => $em->getRepository(Activity::class)->getTaskActivityData($this->getUser())
+            'data' => $data,
+            'lastPage' => $this->paginationService->lastPage($data),
         ]);
     }
 }

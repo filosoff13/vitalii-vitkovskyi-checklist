@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
+use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,13 +23,27 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TaskController extends AbstractController
 {
+    private PaginationService $paginationService;
+
+    public function __construct(PaginationService $paginationService)
+    {
+        $this->paginationService = $paginationService;
+    }
+
     /**
      * @Route("/", name="all")
      */
-    public function ListAll(EntityManagerInterface $em): Response
+    public function ListAll(EntityManagerInterface $em, Request $request): Response
     {
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Task::class)->selectByUser($this->getUser()),
+            $request,
+            4
+        );
+
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $em->getRepository(Task::class)->findByUser($this->getUser()),
+            'tasks' => $data,
+            'lastPage' => $this->paginationService->lastPage($data),
         ]);
     }
 
@@ -37,11 +52,17 @@ class TaskController extends AbstractController
      *
      * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
-    public function listByCategory(Category $category, EntityManagerInterface $em): Response
+    public function listByCategory(Category $category, EntityManagerInterface $em, Request $request): Response
     {
-        $tasks = $em->getRepository(Task::class)->findByCategoryAndUser($category, $this->getUser());
+        $data = $this->paginationService->paginator(
+            $em->getRepository(Task::class)->selectByCategoryAndUser($category, $this->getUser()),
+            $request,
+            4
+        );
+
         return $this->render('checklist/index.html.twig', [
-            'tasks' => $tasks,
+            'tasks' => $data,
+            'lastPage' => $this->paginationService->lastPage($data),
         ]);
     }
 

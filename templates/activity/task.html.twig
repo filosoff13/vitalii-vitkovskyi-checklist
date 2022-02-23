@@ -8,15 +8,18 @@
         <tr>
             <th scope="col">Created at</th>
             <th scope="col">Note name</th>
+            <th scope="col">Edited By</th>
         </tr>
         </thead>
         <tbody>
         {% for item in data %}
             <tr>
-                <td>{{ item.created_at }}</td>
-                <td>{{ item.task_name }}</td>
+                <td>{{ item.createdAt|date("Y-m-d H:m:s", "Europe/Kiev") }}</td>
+                <td>{{ item.task.title }}</td>
+                <td>{{ item.user.username }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    {% include('pagination.html.twig') %}
 {% endblock %}
