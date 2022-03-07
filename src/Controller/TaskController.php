@@ -23,6 +23,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TaskController extends AbstractController
 {
+    const PAGE_LIMIT = 4;
+
     private PaginationService $paginationService;
 
     public function __construct(PaginationService $paginationService)
@@ -38,7 +40,7 @@ class TaskController extends AbstractController
         $data = $this->paginationService->paginator(
             $em->getRepository(Task::class)->selectByUser($this->getUser()),
             $request,
-            4
+            self::PAGE_LIMIT
         );
 
         return $this->render('checklist/index.html.twig', [
@@ -57,7 +59,7 @@ class TaskController extends AbstractController
         $data = $this->paginationService->paginator(
             $em->getRepository(Task::class)->selectByCategoryAndUser($category, $this->getUser()),
             $request,
-            4
+            self::PAGE_LIMIT
         );
 
         return $this->render('checklist/index.html.twig', [
