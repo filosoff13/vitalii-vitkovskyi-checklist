@@ -7,9 +7,11 @@ namespace App\Form;
 use App\Entity\Task;
 use App\Repository\CategoryRepository;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Event\PreSetDataEvent;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -40,6 +42,11 @@ class TaskType extends AbstractType
                 'label' => 'Shared user'
             ])
         ;
+
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            [$this, 'onPreSetData']
+        );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -59,5 +66,18 @@ class TaskType extends AbstractType
     private function getUser(): ?UserInterface
     {
         return $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+    }
+
+    public function onPreSetData(PreSetDataEvent $event): void
+    {
+        /** @var Task $data */
+        if (!$data = $event->getData()){
+            return;
+        }
+        $form = $event->getForm();
+
+        if ($data->getOwner() !== $this->getUser()){
+            $form->remove('category');
+        }
     }
 }

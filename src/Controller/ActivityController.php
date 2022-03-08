@@ -44,7 +44,7 @@ class ActivityController extends AbstractController
 
     /**
      * @Route("/task", name="task")
-     * @IsGranted("ROLE_USER")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function task(EntityManagerInterface $em, Request $request): Response
     {
