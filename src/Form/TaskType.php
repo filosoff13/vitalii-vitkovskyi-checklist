@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Task;
+use App\Entity\User;
+use App\Enum\RolesEnum;
 use App\Repository\CategoryRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PreSetDataEvent;
@@ -63,18 +65,23 @@ class TaskType extends AbstractType
         ]);
     }
 
-    private function getUser(): ?UserInterface
+    private function getUser(): ?User
     {
         return $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
     }
 
     public function onPreSetData(PreSetDataEvent $event): void
     {
+        $form = $event->getForm();
+
+        if (!$this->getUser()->hasRole(RolesEnum::ADMIN)){
+            $form->remove('users');
+        }
+
         /** @var Task $data */
         if (!$data = $event->getData()){
             return;
         }
-        $form = $event->getForm();
 
         if ($data->getOwner() !== $this->getUser()){
             $form->remove('category');
