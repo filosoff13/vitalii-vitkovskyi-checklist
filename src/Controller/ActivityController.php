@@ -49,7 +49,7 @@ class ActivityController extends AbstractController
     public function task(EntityManagerInterface $em, Request $request): Response
     {
         $data = $this->paginationService->paginator(
-            $em->getRepository(Activity::class)->selectTaskActivityData($this->getUser()),
+            $em->getRepository(Activity::class)->selectTaskActivityData(),
             $request,
             2
         );
