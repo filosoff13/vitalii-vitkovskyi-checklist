@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create new category{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h5 class="card-header">Create new category</h5>
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+            {{ form_help(form) }}
+            {{ form_rest(form) }}
+            <input type="submit" value="Create category" class="btn btn-success" />
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Enum\FlashMessagesEnum;
+use App\Form\CategoryType;
 use App\Service\CategoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -31,6 +32,28 @@ class CategoryController extends AbstractController
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category %s was created', $categoryName));
 
         return $this->redirectToRoute('page_home');
+    }
+
+    /**
+     * @Route("/new", name="new", methods={"GET", "POST"})
+     */
+    public function newAction(Request $request, EntityManagerInterface $em): Response
+    {
+        $form = $this->createForm(CategoryType::class);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $category = $form->getData();
+            $em->persist($category);
+            $em->flush();
+            $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category "%s" was created', $category->getTitle()));
+
+            return $this->redirectToRoute('checklist_all');
+        }
+
+        return $this->renderForm('category/new.html.twig', [
+            'form' => $form,
+        ]);
     }
 
     /**
