@@ -1,9 +1,50 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: My App
+            title: DV Campus checklist
             description: This is an awesome app!
             version: 1.0.0
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        paths:
+            /api/login_check:
+              post:
+                description: User Authentication
+                tags:
+                  - Authentication
+                produces:
+                  - application/json
+                parameters:
+                  - name: Credentials
+                    description: User credentials
+                    required: true
+                    in: body
+                    schema:
+                      type: object
+                      properties:
+                        username:
+                          type: string
+                        password:
+                          type: string
+                responses:
+                  '200':
+                    description: Success login
+                    schema:
+                      type: object
+                      properties:
+                        token:
+                          type: string
+                  '401':
+                    description: Invalid credentials
+                    schema:
+                      type: object
+                      properties:
+                        code:
+                          type: integer
+                        message:
+                          type: string
+
+              areas: # to filter documented areas
+                path_patterns:
+                  - ^/api(?!/doc$)
+                host_patterns:
+                  - ^api\.
+
