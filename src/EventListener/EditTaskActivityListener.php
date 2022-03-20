@@ -24,6 +24,6 @@ class EditTaskActivityListener
         $uow = $this->em->getUnitOfWork();
         $changes = $uow->getEntityChangeSet($task);
 
-        $this->noteActivityService->createNoteEditActivity($task, $changes);
+        $this->noteActivityService->createEditTaskActivity($task, $changes);
     }
 }

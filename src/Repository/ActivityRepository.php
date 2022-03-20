@@ -8,7 +8,6 @@ use App\Entity\Activity\Activity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method Activity|null find($id, $lockMode = null, $lockVersion = null)
@@ -28,45 +27,25 @@ class ActivityRepository extends ServiceEntityRepository
      */
     public function selectVisitActivityData(): QueryBuilder
     {
-        return $this->createQueryBuilder('activity')
-            ->orderBy('activity.createdAt', 'DESC')
+        return $this->selectActivityData()
             ->where('activity INSTANCE OF App\Entity\Activity\VisitActivity');
     }
 
     /**
-     * @param UserInterface $user
      * @return QueryBuilder
      */
-    public function selectTaskActivityData(UserInterface $user): QueryBuilder
+    public function selectTaskActivityData(): QueryBuilder
     {
-        return $this->createQueryBuilder('activity')
-            ->orderBy('activity.createdAt', 'DESC')
-            ->where('activity.user =:user')
-            ->andWhere('activity INSTANCE OF App\Entity\Activity\EditTaskActivity')
-            ->setParameter('user', $user);
+        return $this->selectActivityData()
+            ->andWhere('activity INSTANCE OF App\Entity\Activity\EditTaskActivity');
     }
 
-    public function getTaskActivityData(UserInterface $user): array
+    /**
+     * @return QueryBuilder
+     */
+    private function selectActivityData(): QueryBuilder
     {
-        $connection = $this->getEntityManager()->getConnection();
-        $stmt = $connection->prepare('
-             SELECT activity.created_at AS created_at,
-             task.title AS task_name
-
-             FROM activity
-
-             JOIN task ON task.id = activity.task_id
-            
-             WHERE type = :type
-             AND activity.user_id = :user 
-             ORDER BY created_at DESC
-         ');
-
-        $result = $stmt->executeQuery([
-           'type' => 'edit_task',
-           'user' => $user->getId()
-        ]);
-
-        return $result->fetchAllAssociative();
+        return $this->createQueryBuilder('activity')
+            ->orderBy('activity.createdAt', 'DESC');
     }
 }

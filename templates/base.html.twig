@@ -39,10 +39,10 @@
                                 <li class="nav-item">
                                     <a class="nav-link" aria-current="page" href="{{ path('activity_visit') }}">Visit activity</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" aria-current="page" href="{{ path('activity_task') }}">Task edit activity</a>
+                                </li>
                             {% endif %}
-                            <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="{{ path('activity_task') }}">Task edit activity</a>
-                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" aria-current="page" href="{{ path('user_logout') }}">Logout</a>
                             </li>
@@ -120,16 +120,7 @@
                                     </li>
                                 {% endfor %}
                                 <li class="list-group-item">
-                                    <form action="{{ path('category_create') }}" method="POST">
-                                        <div class="row g-3">
-                                            <div class="col-8">
-                                                <input name="name" type="text" class="form-control" placeholder="Name" required>
-                                            </div>
-                                            <div class="col-4">
-                                                <button type="submit" class="form-control" aria-label="Last name">Create</button>
-                                            </div>
-                                        </div>
-                                    </form>
+                                    <a class="list-group-item" href="{{ path('category_new') }}">Create</a>
                                 </li>
                             </ul>
                         </div>
