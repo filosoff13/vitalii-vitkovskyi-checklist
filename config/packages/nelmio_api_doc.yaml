@@ -51,7 +51,7 @@ nelmio_api_doc:
                         message:
                           type: string
 
-            /api/user/registration:
+            /api/user:
               post:
                 description: User Registration
                 tags:
@@ -92,8 +92,6 @@ nelmio_api_doc:
                       properties:
                         error:
                           type: string
-
-            /api/user/list:
               get:
                 description: User List
                 tags:
@@ -118,6 +116,109 @@ nelmio_api_doc:
                               type: string
                   '401':
                     description: Access denied
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+
+            /api/category:
+              post:
+                description: Creating of category
+                tags:
+                  - Category
+                produces:
+                  - application/json
+                parameters:
+                  - name: Category details
+                    description: Category details
+                    required: true
+                    in: body
+                    schema:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                responses:
+                  '200':
+                    description: Created category
+                    schema:
+                      type: Object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                  '400':
+                    description: Bad request
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                  '401':
+                    description: Access denied
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+              get:
+                description: List of categories
+                tags:
+                  - Category
+                produces:
+                  - application/json
+                responses:
+                  '200':
+                    description: List of categories
+                    schema:
+                      type: array
+                      items:
+                        type: Object
+                        properties:
+                          id:
+                            type: integer
+                          title:
+                            type: string
+                  '400':
+                    description: Bad request
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                  '401':
+                    description: Access denied
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+            /api/category/{id}:
+              delete:
+                description: Delete category
+                tags:
+                  - Category
+                produces:
+                  - application/json
+                parameters:
+                  - name: Category id
+                    description: Id of category to delete
+                    required: true
+                    in: path
+                responses:
+                  '200':
+                    description: Category was deleted
+                  '401':
+                    description: Access denied
+                    schema:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                  '404':
+                    description: Category not found
                     schema:
                       type: object
                       properties:
