@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -23,6 +24,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups("API")
      */
     private ?int $id = null;
 
@@ -37,11 +40,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      *      minMessage = "Your User name must be at least {{ limit }} characters long",
      *      maxMessage = "Your User name cannot be longer than {{ limit }} characters"
      * )
+     *
+     * @Groups("API")
      */
     private string $username;
 
     /**
      * @ORM\Column(type="json")
+     *
+     * @Groups("API")
      */
     private array $roles = [];
 

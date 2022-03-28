@@ -8,6 +8,7 @@ use App\Entity\Activity\EditTaskActivity;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -28,7 +29,7 @@ class TaskActivityService
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
 
         if (!$user instanceof User) {
-            throw new HttpException(400, 'User not exists in request');
+            throw new ValidationException('User not exists in request');
         }
 
         $activity = new EditTaskActivity($user, $task, $this->prepareChanges($changes));
