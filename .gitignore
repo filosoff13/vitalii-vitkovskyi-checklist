@@ -9,13 +9,13 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> symfony/phpunit-bridge ###
+###> symfony/phpunit-bridge phpunit/phpunit ###
 .phpunit.result.cache
 /phpunit.xml
-###< symfony/phpunit-bridge ###
+###< symfony/phpunit-bridge phpunit/phpunit ###
 
-###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
-###< phpunit/phpunit ###
 .idea/
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
