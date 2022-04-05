@@ -42,4 +42,16 @@ class TaskController extends AbstractApiController
             'groups' => ['API']
         ]));
     }
+
+    /**
+     * @Route(name="list", methods={"GET"})
+     */
+    public function list(EntityManagerInterface $em): Response
+    {
+        return new ApiResponse($this->serializer->serialize(
+            $em->getRepository(Task::class)->selectByUser($this->getUser())->getQuery()->getResult(),
+            'json',
+            ['groups' => 'API']
+        ));
+    }
 }
