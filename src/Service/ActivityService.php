@@ -34,6 +34,6 @@ class ActivityService
         );
 
         $this->em->persist($activity);
-        $this->em->flush();
+        $this->em->flush($activity);
     }
 }

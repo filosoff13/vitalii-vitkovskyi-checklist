@@ -22,7 +22,7 @@ class Task implements Ownable
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      *
-     * @Groups("API")
+     * @Groups("API_GET")
      */
     private ?int $id = null;
 
@@ -39,7 +39,7 @@ class Task implements Ownable
      *      maxMessage = "Your task title cannot be longer than {{ limit }} characters"
      * )
      *
-     * @Groups("API")
+     * @Groups({"API_GET", "API_UPDATE"})
      */
     private string $title;
 
@@ -56,7 +56,7 @@ class Task implements Ownable
      *      maxMessage = "Your task text cannot be longer than {{ limit }} characters"
      * )
      *
-     * @Groups("API")
+     * @Groups({"API_GET", "API_UPDATE"})
      */
     private string $text;
 
@@ -72,7 +72,7 @@ class Task implements Ownable
      *
      * @Assert\NotBlank(message="Category cannot be empty")
      *
-     * @Groups("API")
+     * @Groups("API_GET")
      */
     private Category $category;
 
@@ -86,7 +86,7 @@ class Task implements Ownable
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
      *
-     * @Groups("API")
+     * @Groups("API_GET")
      */
     private UserInterface $owner;
 

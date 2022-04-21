@@ -380,3 +380,78 @@ nelmio_api_doc:
                     type: array
                     items:
                       type: string
+        put:
+          description: Edit task
+          tags:
+            - Task
+          produces:
+            - application/json
+          parameters:
+            - name: id
+              description: Id of task to edit
+              required: true
+              in: path
+            - name: Task details
+              description: Task details
+              required: true
+              in: body
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  text:
+                    type: string
+                  category:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+          responses:
+            '200':
+              description: Task was updated
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  text:
+                    type: string
+                  category:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      title:
+                        type: string
+                  owner:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      roles:
+                        type: array
+                        items:
+                          type: string
+            '400':
+              description: Bad request
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+            '401':
+              description: Access denied
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string

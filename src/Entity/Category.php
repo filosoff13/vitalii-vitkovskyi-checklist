@@ -23,7 +23,7 @@ class Category implements Ownable
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      *
-     * @Groups("API")
+     * @Groups("API_GET")
      */
     private ?int $id = null;
 
@@ -39,7 +39,7 @@ class Category implements Ownable
      *      maxMessage = "Your Category title cannot be longer than {{ limit }} characters"
      * )
      *
-     * @Groups("API")
+     * @Groups("API_GET")
      */
     private string $title;
 
