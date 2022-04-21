@@ -347,3 +347,36 @@ nelmio_api_doc:
                     type: array
                     items:
                       type: string
+      /api/task/{id}:
+        delete:
+          description: Delete task
+          tags:
+            - Task
+          produces:
+            - application/json
+          parameters:
+            - name: id
+              description: Id of task to delete
+              required: true
+              in: path
+          responses:
+            '200':
+              description: Task was deleted
+            '401':
+              description: Access denied
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+            '404':
+              description: Task not found
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string

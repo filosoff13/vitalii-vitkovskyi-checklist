@@ -68,7 +68,8 @@ class HttpExceptionListener
         }
 
         if ($exception instanceof NotFoundHttpException) {
-            return [$exception->getMessage()];
+            //@TODO return 404 code
+            return ['Task not found'];
         }
 
         if ($exception instanceof AccessDeniedHttpException) {

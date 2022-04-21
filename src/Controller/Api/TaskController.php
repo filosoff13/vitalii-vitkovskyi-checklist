@@ -8,6 +8,7 @@ use App\Entity\Task;
 use App\Exception\ValidationException;
 use App\Model\API\ApiResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -53,5 +54,24 @@ class TaskController extends AbstractApiController
             'json',
             ['groups' => 'API']
         ));
+    }
+
+    /**
+     * @Route("/{id}", name="delete", methods={"DELETE"})
+     *
+     * @IsGranted("IS_SHARED", subject="task", statusCode=404)
+     */
+    public function delete(Task $task, EntityManagerInterface $em): Response
+    {
+        if ($this->getUser() === $task->getUser()){
+            $em->remove($task);
+        } else {
+            $task->getUsers()->removeElement($this->getUser());
+        }
+
+        $em->flush();
+
+
+        return new ApiResponse();
     }
 }
