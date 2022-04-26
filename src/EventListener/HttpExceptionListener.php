@@ -35,21 +35,20 @@ class HttpExceptionListener
         if (!$exception instanceof ValidationException) {
             return;
         }
-
+        // TODO: implement referUrl using relative pass
         $session = $request->getSession();
 
         if (!$refererUrl = $request->headers->get('referer')) {
             $refererUrl = '/';
         }
         $response = new RedirectResponse($refererUrl);
-        $response->setStatusCode($exception->getCode());
 
         foreach ($exception->getErrorsList() as $error) {
             $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $error->getMessage());
         }
 
         if ($exception->getMessage()) {
-            $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $error->getMessage());
+            $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $exception->getMessage());
         }
         $event->setResponse($response);
     }
