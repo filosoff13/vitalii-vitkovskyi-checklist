@@ -32,7 +32,7 @@ class HttpExceptionListener
         }
 
         $exception = $event->getThrowable();
-        if (!$exception instanceof ValidationException || !$exception instanceof NotFoundHttpException) {
+        if (!$exception instanceof ValidationException) {
             return;
         }
 
@@ -42,10 +42,15 @@ class HttpExceptionListener
             $refererUrl = '/';
         }
         $response = new RedirectResponse($refererUrl);
-        $response->setStatusCode($exception->getStatusCode());
-        $response->headers->replace($exception->getHeaders());
+        $response->setStatusCode($exception->getCode());
 
-        $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $exception->getMessage());
+        foreach ($exception->getErrorsList() as $error) {
+            $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $error->getMessage());
+        }
+
+        if ($exception->getMessage()) {
+            $session->getFlashBag()->add(FlashMessagesEnum::FAIL, $error->getMessage());
+        }
         $event->setResponse($response);
     }
 
