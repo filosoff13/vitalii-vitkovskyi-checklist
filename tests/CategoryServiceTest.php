@@ -20,10 +20,20 @@ class CategoryServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->mockObject = $this->createMock(ValidatorInterface::class);
-        $this->userService = new CategoryService(
+        $this->categoryService = new CategoryService(
             $this->mockObject,
             $this->createMock(EntityManagerInterface::class)
         );
+    }
+
+    public function test_create_validationEmptyFailed_exceptionThrown(): void
+    {
+        $this->mockObject->method('validate')->willReturn(new ConstraintViolationList([
+            new ConstraintViolation('test_error', null, [], null, null, null)
+        ]));
+
+        $this->expectException(ValidationException::class);
+        $this->categoryService->createAndFlush('');
     }
 
     public function test_create_validationFailed_exceptionThrown(): void
@@ -33,13 +43,13 @@ class CategoryServiceTest extends TestCase
         ]));
 
         $this->expectException(ValidationException::class);
-        $this->userService->createAndFlush('');
+        $this->categoryService->createAndFlush('te');
     }
 
     public function test_create_validationSuccess_returnCategory(): void
     {
         $this->mockObject->method('validate')->willReturn(new ConstraintViolationList([]));
-        $category = $this->userService->createAndFlush('test_category');
+        $category = $this->categoryService->createAndFlush('test_category');
 
         $this->assertInstanceOf(Category::class, $category);
         $this->assertEquals('test_category', $category->getTitle());
