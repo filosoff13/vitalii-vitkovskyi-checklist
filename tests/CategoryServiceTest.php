@@ -15,20 +15,20 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CategoryServiceTest extends TestCase
 {
     private CategoryService $categoryService;
-    private MockObject $mockObject;
+    private MockObject $validator;
 
     protected function setUp(): void
     {
-        $this->mockObject = $this->createMock(ValidatorInterface::class);
+        $this->validator = $this->createMock(ValidatorInterface::class);
         $this->categoryService = new CategoryService(
-            $this->mockObject,
+            $this->validator,
             $this->createMock(EntityManagerInterface::class)
         );
     }
 
-    public function test_create_validationEmptyFailed_exceptionThrown(): void
+    public function test_createAndFlush_validationEmptyFailed_exceptionThrown(): void
     {
-        $this->mockObject->method('validate')->willReturn(new ConstraintViolationList([
+        $this->validator->method('validate')->willReturn(new ConstraintViolationList([
             new ConstraintViolation('test_error', null, [], null, null, null)
         ]));
 
@@ -36,9 +36,9 @@ class CategoryServiceTest extends TestCase
         $this->categoryService->createAndFlush('');
     }
 
-    public function test_create_validationFailed_exceptionThrown(): void
+    public function test_createAndFlush_validationFailed_exceptionThrown(): void
     {
-        $this->mockObject->method('validate')->willReturn(new ConstraintViolationList([
+        $this->validator->method('validate')->willReturn(new ConstraintViolationList([
             new ConstraintViolation('test_error', null, [], null, null, null)
         ]));
 
@@ -46,9 +46,9 @@ class CategoryServiceTest extends TestCase
         $this->categoryService->createAndFlush('te');
     }
 
-    public function test_create_validationSuccess_returnCategory(): void
+    public function test_createAndFlush_validationSuccess_returnCategory(): void
     {
-        $this->mockObject->method('validate')->willReturn(new ConstraintViolationList([]));
+        $this->validator->method('validate')->willReturn(new ConstraintViolationList([]));
         $category = $this->categoryService->createAndFlush('test_category');
 
         $this->assertInstanceOf(Category::class, $category);
