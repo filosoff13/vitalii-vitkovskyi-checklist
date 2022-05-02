@@ -15,7 +15,7 @@ class ValidationException extends Exception
     public function __construct(string $message = "", ConstraintViolationList $errorsList = null)
     {
         parent::__construct($message, Response::HTTP_BAD_REQUEST);
-        $this->errorsList = $errorsList;
+        $this->errorsList = $errorsList ?: new ConstraintViolationList() ;
     }
 
     public function getErrorsList(): ?ConstraintViolationList
