@@ -1,14 +1,14 @@
 controllers:
-    resource: ../../src/Controller/*
-    exclude: ../../src/Controller/Api
+    resource: ../../src/Controller/**/*
     type: annotation
+    exclude: ../../src/Controller/Api
+
+api_controllers:
+    resource: ../../src/Controller/Api
+    type: annotation
+    prefix: api
+    name_prefix: api_
 
 kernel:
     resource: ../../src/Kernel.php
-    type: annotation
-
-api_controllers:
-    resource: ../../src/Controller/Api/*
-    name_prefix: api_
-    prefix: api/
     type: annotation

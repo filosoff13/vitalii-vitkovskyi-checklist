@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -20,6 +21,8 @@ class Task implements Ownable
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups("API_GET")
      */
     private ?int $id = null;
 
@@ -35,6 +38,8 @@ class Task implements Ownable
      *      minMessage = "Your task title must be at least {{ limit }} characters long",
      *      maxMessage = "Your task title cannot be longer than {{ limit }} characters"
      * )
+     *
+     * @Groups({"API_GET", "API_UPDATE"})
      */
     private string $title;
 
@@ -50,6 +55,8 @@ class Task implements Ownable
      *      minMessage = "Your task text must be at least {{ limit }} characters long",
      *      maxMessage = "Your task text cannot be longer than {{ limit }} characters"
      * )
+     *
+     * @Groups({"API_GET", "API_UPDATE"})
      */
     private string $text;
 
@@ -64,6 +71,8 @@ class Task implements Ownable
      * @ORM\JoinColumn(nullable=false)
      *
      * @Assert\NotBlank(message="Category cannot be empty")
+     *
+     * @Groups("API_GET")
      */
     private Category $category;
 
@@ -76,6 +85,8 @@ class Task implements Ownable
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups("API_GET")
      */
     private UserInterface $owner;
 

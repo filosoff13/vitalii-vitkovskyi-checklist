@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Entity\Category;
-use App\Enum\FlashMessagesEnum;
-use App\Form\CategoryType;
 use App\Model\API\ApiResponse;
 use App\Service\CategoryService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,7 +30,7 @@ class CategoryController extends AbstractApiController
         $category = $categoryService->createAndFlush($categoryName);
 
         return new ApiResponse($this->serializer->serialize($category, 'json', [
-            'groups' => ['API']
+            'groups' => ['API_GET']
         ]));
     }
 
@@ -46,16 +44,16 @@ class CategoryController extends AbstractApiController
         ]);
 
         return new ApiResponse($this->serializer->serialize($categories, 'json', [
-            'groups' => ['API']
+            'groups' => ['API_GET']
         ]));
     }
 
     /**
-     * @Route("/delete/{id}", name="delete", requirements={"id"="\d+"}, methods={"DELETE"})
+     * @Route("/{id}", name="delete", requirements={"id"="\d+"}, methods={"DELETE"})
      *
      * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
-    public function deleteAction(Category $category, EntityManagerInterface $em): Response
+    public function delete(Category $category, EntityManagerInterface $em): Response
     {
         $em->remove($category);
         $em->flush();

@@ -6,14 +6,23 @@ namespace App\EventListener;
 
 use App\Enum\FlashMessagesEnum;
 use App\Exception\ValidationException;
+use App\Service\DataTransformService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class HttpExceptionListener
 {
+    private DataTransformService $dataTransformService;
+
+    public function __construct(DataTransformService $dataTransformService)
+    {
+        $this->dataTransformService = $dataTransformService;
+    }
+
     public function onKernelException(ExceptionEvent $event): void
     {
         $request = $event->getRequest();
@@ -44,19 +53,29 @@ class HttpExceptionListener
     {
         $exception = $event->getThrowable();
 
-        $event->setResponse(new JsonResponse(['error' => $this->getErrorMessage($exception)]));
+        $event->setResponse(new JsonResponse(
+            ['errors' => $this->getErrorMessages($exception)],
+            $exception->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR
+        ));
     }
 
-    private function getErrorMessage(\Throwable $exception): string
+    private function getErrorMessages(\Throwable $exception): array
     {
-        if ($exception instanceof ValidationException || $exception instanceof NotFoundHttpException) {
-            return $exception->getMessage();
+        if ($exception instanceof ValidationException) {
+            return $exception->getErrorsList()
+                ? $this->dataTransformService->transformViolationListToArray($exception->getErrorsList())
+                : [$exception->getMessage()];
         }
 
-        if ($exception instanceof AccessDeniedHttpException){
-            return "Access denied";
+        if ($exception instanceof NotFoundHttpException) {
+            //@TODO return 404 code
+            return ['Task not found'];
         }
 
-        return 'Something went wrong ...';
+        if ($exception instanceof AccessDeniedHttpException) {
+            return ["Access denied"];
+        }
+
+        return ['Something went wrong ...'];
     }
 }
