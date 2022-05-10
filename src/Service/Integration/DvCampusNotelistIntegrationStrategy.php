@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service\Integration;
 
 use App\Entity\ApiIntegration;
@@ -63,7 +65,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         // $contentType = 'application/json'8
         $content = $response->getContent(false);
         // $content = '{"id":521583, "name":"symfony-docs", ...}'
-        $content = $response->toArray();
+//        $content = $response->toArray();
         // $content = ['id' => 521583, 'name' => 'symfony-docs', ...]
 
 //        return $content;
