@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\ApiIntegrationsEnum;
 use App\Repository\ApiIntegrationRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -22,41 +21,36 @@ class ApiIntegration
     private $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string")
      */
-    private ?int $type;
+    private ApiIntegrationsEnum $type;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class)
+     * @ORM\ManyToOne(targetEntity=User::class)
      */
-    private ArrayCollection $user;
+    private User $user;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private bool $enabled;
+    private bool $enabled = true;
 
     /**
      * @ORM\Column(type="json")
      */
     private array $config = [];
 
-    public function __construct()
-    {
-        $this->user = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getType(): ?int
+    public function getType(): ?ApiIntegrationsEnum
     {
         return $this->type;
     }
 
-    public function setType(int $type): self
+    public function setType(ApiIntegrationsEnum $type): self
     {
         $this->type = $type;
 
@@ -64,25 +58,16 @@ class ApiIntegration
     }
 
     /**
-     * @return Collection|User[]
+     * @return User
      */
-    public function getUser(): Collection
+    public function getUser(): User
     {
         return $this->user;
     }
 
-    public function addUser(User $user): self
+    public function setUser(User $user): self
     {
-        if (!$this->user->contains($user)) {
-            $this->user[] = $user;
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->user->removeElement($user);
+        $this->user = $user;
 
         return $this;
     }

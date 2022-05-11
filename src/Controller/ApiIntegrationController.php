@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Service\Integration\IntegrationContext;
+use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,31 +24,31 @@ class ApiIntegrationController extends AbstractController
      */
     public function index(IntegrationContext $context): Response
     {
-        $context->create(0, []);
+        $user = $this->getUser();
 
-        return $this->render('api_integration/index.html.twig', [
-            'controller_name' => 'ApiIntegrationController',
-        ]);
+//        $context->create(0, ['username' => $user->getUserIdentifier(), 'password' => $user->getPassword()]);
+
+        return $this->render('api_integration/index.html.twig', []);
     }
 
-    public function submit(): Response
-    {
-        // if is config existed
-        //  change enable/disable integration
-        //  redirect to index
-
-        // redirect to setup
-    }
-
-    public function setup(int $type): Response {
+    /**
+     * @Route("/setup", name="setup", methods={"POST"})
+     */
+    public function setup(Request $request, IntegrationContext $context): Response {
         // if method get
-        // show form
+//        if ($request->getMethod() == 'GET') {
+//            // show form
+//
+//        }
 
         // post
 
-        // IntegrationContextService->createIntegration($type)
+        /** @var User $user */
+        $user = $this->getUser();
+        $context->saveIntegrations($request->request->getIterator()->getArrayCopy(), $user);
 
 
         // redirect to the index
+        return $this->redirectToRoute('integration_index');
     }
 }
