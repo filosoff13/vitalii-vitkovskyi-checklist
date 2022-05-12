@@ -23,7 +23,7 @@ class ApiIntegration
     /**
      * @ORM\Column(type="string")
      */
-    private ApiIntegrationsEnum $type;
+    private string $type;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
@@ -45,12 +45,12 @@ class ApiIntegration
         return $this->id;
     }
 
-    public function getType(): ?ApiIntegrationsEnum
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType(ApiIntegrationsEnum $type): self
+    public function setType(string $type): self
     {
         $this->type = $type;
 

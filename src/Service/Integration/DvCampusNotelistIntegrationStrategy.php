@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Namshi\JOSE\JWT;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -99,31 +100,6 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         $this->em->persist($apiIntegration);
         $this->em->flush();
 
-        // ------------------------------------
-        // save password
-
-//        // make API request to the dv campus notelist
-//        $response = $this->makeRequest(
-//            self::HOST . self::CREATE_USER_URL,
-//            'POST',
-//            [
-//                'json' => [
-//                    'username' => $username,
-//                    'password' => $userPassword
-//                ]
-//            ]
-//        );
-
-
-//         if ($response->getStatusCode() !== 200) {
-//             // throw ValidationException
-//             throw new ValidationException('Not ok status code');
-//         }
-//
-//        // save config
-//        // ------------------------------------
-//        return new ApiIntegration();
-
         return $apiIntegration;
     }
 
@@ -137,19 +113,25 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
                     'password' => $password
                 ]
             ]
-
-//            [
-//                'auth_bearer' =>
-//            ]
         );
 
-        return $response->getStatusCode(false) === Response::HTTP_OK
-            ? $response->getContent()['token']
-            : null;
+        if ($response->getStatusCode(false) === Response::HTTP_OK) {
+            $dataArray = json_decode($response->getContent(), true);
+            return $dataArray['token'];
+        }
+
+        return null;
+//        return $response->getStatusCode(false) === Response::HTTP_OK
+//            ? $response->getContent()['token']
+//            : null;
     }
 
 
     private function register(string $username, string $password): void {
+//        $this->client->request('POST', self::SING_IN_URI, ['username' => $this->username, 'password' => $this->password], [], ['HTTP_ACCEPT' => 'application/json']);
+//        $loginResponse = json_decode($this->client->getResponse()->getContent());
+//        $authenticateHeaders = ['HTTP_TOKEN' => isset($loginResponse->Token) ? $loginResponse->Token : null, 'HTTP_EXPIREAT' => isset($loginResponse->ExpireAt) ? $loginResponse->ExpireAt : null, 'HTTP_USERNAME' => isset($loginResponse->Username) ? $loginResponse->Username : null];
+
         $response = $this->makeRequest(
             self::HOST . self::CREATE_USER_URL,
             'POST',
@@ -178,8 +160,6 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         // $content = '{"id":521583, "name":"symfony-docs", ...}'
 //        $content = $response->toArray();
         // $content = ['id' => 521583, 'name' => 'symfony-docs', ...]
-
-//        return $content;
         return $response;
     }
 }
