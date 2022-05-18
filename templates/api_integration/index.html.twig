@@ -3,6 +3,20 @@
 {% block title %}Api integration status{% endblock %}
 
 {% block body %}
+    <script>
+        function disableEnableField(){
+
+            let disabled = document.getElementById('dv-notelist').checked;
+            if(disabled===false){ //disable
+                document.getElementById('dv-notelist-tokent').disabled = true;
+                document.getElementById('dv-notelist-tokent').value = "";
+            }
+            else{  //enable again
+                document.getElementById('dv-notelist-tokent').disabled = false;
+                document.getElementById('dv-notelist-tokent').value = "";
+            }
+        }
+    </script>
     <form action="{{ path('integration_setup') }}" method="POST">
         <table class="table">
             <thead>
@@ -18,11 +32,10 @@
 {#                    <td><label for="dv-notelist">{{ getIntegrationNameByType(integration.type) }}</label></td>#}
                     <td><label for="dv-notelist">DvCampusNotelistIntegration</label></td>
                     <td>
-                        <input type="checkbox" name="notelist-enabled" data-toggle="toggle" id="dv-notelist" {% if integration.enabled %}checked{% endif %}>
+                        <input type="checkbox" onclick="disableEnableField()" name="notelist-enabled" data-toggle="toggle" id="dv-notelist" {% if integration.enabled %}checked{% endif %}>
                     </td>
                     <td>
                         <input type="text" name="notelist-token" id="dv-notelist-tokent">
-{#                        <input type="text" name="notelist-token" id="dv-notelist-tokent" {% if integration.enabled %}value="*******" disabled{% endif %}>#}
                     </td>
                 </tr>
             {% endfor %}
