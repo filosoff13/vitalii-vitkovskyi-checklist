@@ -9,7 +9,6 @@ use App\Entity\User;
 use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Namshi\JOSE\JWT;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -35,22 +34,16 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
 
     public function save(array $data, User $user): void
     {
-        // TODO: deserialize to some model
-
-        // TODO: check
         $enabled = (bool) ($data['notelist-enabled'] ?? false);
 
         $repository = $this->em->getRepository(ApiIntegration::class);
         $apiIntegration = $repository->findOneOrNullBy([
             'user' => $user,
-            'type' => ApiIntegrationsEnum::NOTELIST // TODO: create enum
+            'type' => ApiIntegrationsEnum::NOTELIST
         ]);
 
         if (!$apiIntegration) {
-            if ($enabled) {
-                $this->create($data, $user);
-            }
-
+            $this->create($data, $user);
             return;
         }
 
@@ -58,13 +51,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             return;
         }
 
-        if ($enabled) {
-            $this->create($data, $user);
-            return;
-        }
-
-        $this->em->remove($apiIntegration);
-        $this->em->flush();
+        $this->verify($apiIntegration, $enabled, $user, $data);
     }
 
     /**
@@ -95,7 +82,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             'token' => $token
         ])
             ->setType(ApiIntegrationsEnum::NOTELIST)
-            ->setUser($user); // TODO: enum
+            ->setUser($user);
 
         $this->em->persist($apiIntegration);
         $this->em->flush();
@@ -121,18 +108,11 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         }
 
         return null;
-//        return $response->getStatusCode(false) === Response::HTTP_OK
-//            ? $response->getContent()['token']
-//            : null;
     }
 
 
     private function register(string $username, string $password): void {
-//        $this->client->request('POST', self::SING_IN_URI, ['username' => $this->username, 'password' => $this->password], [], ['HTTP_ACCEPT' => 'application/json']);
-//        $loginResponse = json_decode($this->client->getResponse()->getContent());
-//        $authenticateHeaders = ['HTTP_TOKEN' => isset($loginResponse->Token) ? $loginResponse->Token : null, 'HTTP_EXPIREAT' => isset($loginResponse->ExpireAt) ? $loginResponse->ExpireAt : null, 'HTTP_USERNAME' => isset($loginResponse->Username) ? $loginResponse->Username : null];
-
-        $response = $this->makeRequest(
+        $this->makeRequest(
             self::HOST . self::CREATE_USER_URL,
             'POST',
             [
@@ -153,13 +133,33 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         );
 
         $statusCode = $response->getStatusCode();
-        // $statusCode = 200
         $contentType = $response->getHeaders(false)['content-type'][0];
-        // $contentType = 'application/json'8
         $content = $response->getContent(false);
-        // $content = '{"id":521583, "name":"symfony-docs", ...}'
-//        $content = $response->toArray();
-        // $content = ['id' => 521583, 'name' => 'symfony-docs', ...]
+
         return $response;
+    }
+
+    public function verify(?ApiIntegration $apiIntegration, bool $enabled, User $user, $data): void
+    {
+        if ($enabled) {
+            $userPassword = $data['notelist-token'] ?? null;
+            if (!$userPassword) {
+                throw new ValidationException('Token missed');
+            }
+
+            $username = $user->getUserIdentifier();
+            $token = $this->login($username, $userPassword);
+        } else {
+            $userPassword = '';
+            $token = '';
+        }
+
+        $apiIntegration->setConfig([
+            'password' => $userPassword,
+            'token' => $token
+        ])
+            ->setEnabled($enabled);
+        $this->em->persist($apiIntegration);
+        $this->em->flush();
     }
 }
