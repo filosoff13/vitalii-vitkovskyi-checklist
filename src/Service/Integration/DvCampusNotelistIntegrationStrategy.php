@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Integration;
 
 use App\Entity\ApiIntegration;
+use App\Entity\Category;
 use App\Entity\User;
 use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
@@ -18,6 +19,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
     const HOST = 'https://dv-campus-notelist.allbugs.info/api';
     const CREATE_USER_URL = '/user';
     const LOGIN_URL = '/login_check';
+    const CATEGORY_URL = '/category';
 
     private HttpClientInterface $client;
     private EntityManagerInterface $em;
@@ -44,6 +46,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
 
         if (!$apiIntegration) {
             $this->create($data, $user);
+            $this->getCategories($user);
             return;
         }
 
@@ -87,10 +90,46 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         $this->em->persist($apiIntegration);
         $this->em->flush();
 
+        // TODO run command for synchronisation
+
+
         return $apiIntegration;
     }
 
-    private function login(string $username, string $password): ?string {
+    public function getCategories(User $user): void
+    {
+        $repository = $this->em->getRepository(Category::class);
+        $categories = $repository->findBy(['user' => $user]);
+        foreach ($categories as $category) {
+            $this->postCategory($category->getTitle());
+        }
+    }
+
+    private function postCategory(string $name): int
+    {
+        $response = $this->makeRequest(
+            self::HOST . self::CATEGORY_URL,
+            'POST',
+            [
+                'json' => [
+                    'name' => $name
+                ]
+            ]
+        );
+
+        $statusCode = $response->getStatusCode(false);
+        if ($statusCode === Response::HTTP_UNAUTHORIZED) {
+            throw new \Exception('JWT Token not found');
+        }
+        if ($statusCode === Response::HTTP_OK) {
+            return Response::HTTP_CREATED;
+        }
+
+        return Response::HTTP_FORBIDDEN;
+    }
+
+    private function login(string $username, string $password): ?string
+    {
         $response = $this->makeRequest(
             self::HOST . self::LOGIN_URL,
             'POST',
@@ -111,8 +150,9 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
     }
 
 
-    private function register(string $username, string $password): void {
-        $this->makeRequest(
+    private function register(string $username, string $password): void
+    {
+        $response = $this->makeRequest(
             self::HOST . self::CREATE_USER_URL,
             'POST',
             [
@@ -122,6 +162,10 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
                 ]
             ]
         );
+
+        if ($response->getStatusCode(false) === Response::HTTP_BAD_REQUEST) {
+            throw new \Exception('User with such name already exists');
+        }
     }
 
     private function makeRequest(string $url, string $method = 'GET', array $options = []): ResponseInterface
@@ -149,6 +193,8 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
 
             $username = $user->getUserIdentifier();
             $token = $this->login($username, $userPassword);
+
+            $this->getCategories($user);
         } else {
             $userPassword = '';
             $token = '';
