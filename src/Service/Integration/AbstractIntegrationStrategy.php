@@ -10,5 +10,5 @@ use App\Entity\User;
 abstract class AbstractIntegrationStrategy
 {
     abstract public function save(array $data, User $user): void;
-    abstract public function create(array $data, User $user): ApiIntegration;
+    abstract public function create(array $data, User $user): string;
 }

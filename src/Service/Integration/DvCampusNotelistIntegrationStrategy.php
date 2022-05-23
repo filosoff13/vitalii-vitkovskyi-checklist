@@ -11,6 +11,7 @@ use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -45,8 +46,9 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         ]);
 
         if (!$apiIntegration) {
-            $this->create($data, $user);
-            $this->getCategories($user);
+            $token = $this->create($data, $user);
+            $this->getCategories($user, $token);
+            $this->getPosts($user, $token);
             return;
         }
 
@@ -60,7 +62,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
     /**
      * @throws ValidationException
      */
-    public function create(array $data, User $user): ApiIntegration
+    public function create(array $data, User $user): string
     {
         $userPassword = $data['notelist-token'] ?? null;
         if (!$userPassword) {
@@ -93,24 +95,37 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         // TODO run command for synchronisation
 
 
-        return $apiIntegration;
+        return $token;
     }
 
-    public function getCategories(User $user): void
+    /**
+     * @throws \Exception
+     */
+    public function getCategories(User $user, $token): void
     {
         $repository = $this->em->getRepository(Category::class);
         $categories = $repository->findBy(['user' => $user]);
         foreach ($categories as $category) {
-            $this->postCategory($category->getTitle());
+            $this->postCategory($category->getTitle(), $token);
         }
     }
 
-    private function postCategory(string $name): int
+    public function getPosts(User $user, $token): void
+    {
+        $repository = $this->em->getRepository(Category::class);
+        $categories = $repository->findBy(['user' => $user]);
+        foreach ($categories as $category) {
+            $this->postCategory($category->getTitle(), $token);
+        }
+    }
+
+    private function postCategory(string $name, $token): void
     {
         $response = $this->makeRequest(
             self::HOST . self::CATEGORY_URL,
             'POST',
             [
+                'headers' => ['Authorization' => sprintf('Bearer %s', $token)],
                 'json' => [
                     'name' => $name
                 ]
@@ -121,11 +136,11 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         if ($statusCode === Response::HTTP_UNAUTHORIZED) {
             throw new \Exception('JWT Token not found');
         }
-        if ($statusCode === Response::HTTP_OK) {
-            return Response::HTTP_CREATED;
-        }
-
-        return Response::HTTP_FORBIDDEN;
+//        if ($statusCode === Response::HTTP_OK) {
+//            return Response::HTTP_CREATED;
+//        }
+//
+//        return Response::HTTP_FORBIDDEN;
     }
 
     private function login(string $username, string $password): ?string
@@ -194,7 +209,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             $username = $user->getUserIdentifier();
             $token = $this->login($username, $userPassword);
 
-            $this->getCategories($user);
+            $this->getCategories($user, $token);
         } else {
             $userPassword = '';
             $token = '';
