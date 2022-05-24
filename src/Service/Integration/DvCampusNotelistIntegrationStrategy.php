@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Service\Integration;
 
 use App\Entity\ApiIntegration;
+use App\Entity\ApiIntegrationCategory;
 use App\Entity\Category;
+use App\Entity\Task;
 use App\Entity\User;
 use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
@@ -48,7 +50,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         if (!$apiIntegration) {
             $token = $this->create($data, $user);
             $this->getCategories($user, $token);
-            $this->getPosts($user, $token);
+            $this->getTasks($user, $token);
             return;
         }
 
@@ -98,24 +100,59 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         return $token;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function getCategories(User $user, $token): void
     {
         $repository = $this->em->getRepository(Category::class);
         $categories = $repository->findBy(['user' => $user]);
         foreach ($categories as $category) {
-            $this->postCategory($category->getTitle(), $token);
+            $repository = $this->em->getRepository(ApiIntegrationCategory::class);
+            $apiIntegrationCategory = $repository->findBy(['externalId' => $category->getId()]);
+            if (!$apiIntegrationCategory) {
+                $this->postCategory($category->getTitle(), $token);
+
+                $apiIntegrationCategory = new ApiIntegrationCategory();
+                $apiIntegrationCategory->setExternalId($category->getId())
+                    ->setCategory($category);
+                $this->em->persist($apiIntegrationCategory);
+                $this->em->flush();
+            }
         }
     }
 
-    public function getPosts(User $user, $token): void
+    public function getTasks(User $user, $token): void
     {
-        $repository = $this->em->getRepository(Category::class);
-        $categories = $repository->findBy(['user' => $user]);
-        foreach ($categories as $category) {
-            $this->postCategory($category->getTitle(), $token);
+        $repository = $this->em->getRepository(Task::class);
+        $tasks = $repository->findByUser($user);
+        foreach ($tasks as $task) {
+            // TODO check in 'api_integration_category' table
+//            $repository = $this->em->getRepository(ApiIntegrationCategory::class);
+//            $tasks = $repository->findByUser($user);
+            $this->postTask($task, $token);
+            // TODO write in 'api_integration_category' table
+        }
+    }
+
+    private function postTask(Task $task, $token): void
+    {
+        $category = $task->getCategory();
+        $response = $this->makeRequest(
+            self::HOST . self::CATEGORY_URL,
+            'POST',
+            [
+                'headers' => ['Authorization' => sprintf('Bearer %s', $token)],
+                'json' => [
+                      'title' => $task->getTitle(),
+                      'text' => $task->getTitle(),
+                      "category" => [
+                            'id' => $category->getId()
+                      ]
+                ]
+            ]
+        );
+
+        $statusCode = $response->getStatusCode(false);
+        if ($statusCode === Response::HTTP_UNAUTHORIZED) {
+            throw new \Exception('JWT Token not found');
         }
     }
 
@@ -136,11 +173,6 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         if ($statusCode === Response::HTTP_UNAUTHORIZED) {
             throw new \Exception('JWT Token not found');
         }
-//        if ($statusCode === Response::HTTP_OK) {
-//            return Response::HTTP_CREATED;
-//        }
-//
-//        return Response::HTTP_FORBIDDEN;
     }
 
     private function login(string $username, string $password): ?string
@@ -210,6 +242,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             $token = $this->login($username, $userPassword);
 
             $this->getCategories($user, $token);
+            $this->getTasks($user, $token);
         } else {
             $userPassword = '';
             $token = '';

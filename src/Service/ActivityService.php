@@ -33,6 +33,13 @@ class ActivityService
             $user instanceof User ? $user : null
         );
 
+        if (!$this->em->isOpen()) {
+            $this->em = $this->em->create(
+                $this->em->getConnection(),
+                $this->em->getConfiguration()
+            );
+        }
+
         $this->em->persist($activity);
         $this->em->flush($activity);
     }

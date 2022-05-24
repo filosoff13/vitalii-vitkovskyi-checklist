@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Enum\ApiIntegrationsEnum;
 use App\Repository\ApiIntegrationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
