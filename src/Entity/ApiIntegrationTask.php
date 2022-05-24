@@ -17,7 +17,7 @@ class ApiIntegrationTask
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=ApiIntegration::class)

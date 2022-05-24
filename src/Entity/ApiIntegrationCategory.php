@@ -15,23 +15,23 @@ class ApiIntegrationCategory
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=ApiIntegration::class)
      */
-    private $apiIntegration;
+    private ?ApiIntegration $apiIntegration;
 
     /**
      * @ORM\ManyToOne(targetEntity=Category::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $category;
+    private Category $category;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $externalId;
+    private int $externalId;
 
     public function getId(): ?int
     {
