@@ -14,7 +14,6 @@ use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -97,61 +96,65 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         $this->em->flush();
 
         // TODO run command for synchronisation
-
-
         return $token;
     }
 
-    public function getCategories(User $user, $token, $apiIntegration): void
+    public function getCategories(User $user, string $token, ?ApiIntegration $apiIntegration): void
     {
         $repository = $this->em->getRepository(Category::class);
         $categories = $repository->findBy(['user' => $user]);
         foreach ($categories as $category) {
             $repository = $this->em->getRepository(ApiIntegrationCategory::class);
             $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
-            if (!$apiIntegrationCategory) {
-                $externalId = $this->postCategory($category->getTitle(), $token);
-
-                $apiIntegrationCategory = new ApiIntegrationCategory();
-                $apiIntegrationCategory->setExternalId($externalId)
-                    ->setCategory($category)
-                    ->setApiIntegration($apiIntegration);
-                $this->em->persist($apiIntegrationCategory);
-                $this->em->flush();
+            if ($apiIntegrationCategory) {
+                continue;
             }
+            $externalId = $this->postCategory($category->getTitle(), $token);
+
+            $apiIntegrationCategory = new ApiIntegrationCategory();
+            $apiIntegrationCategory->setExternalId($externalId)
+                ->setCategory($category)
+                ->setApiIntegration($apiIntegration);
+            $this->em->persist($apiIntegrationCategory);
         }
+
+        $this->em->flush();
     }
 
-    public function getTasks(User $user, $token, $apiIntegration): void
+    public function getTasks(User $user, $token, ?ApiIntegration $apiIntegration): void
     {
         $repository = $this->em->getRepository(Task::class);
         $tasks = $repository->findByUser($user);
+        $repository = $this->em->getRepository(ApiIntegrationTask::class);
         foreach ($tasks as $task) {
-            $repository = $this->em->getRepository(ApiIntegrationTask::class);
             $apiIntegrationTask = $repository->findBy(['task' => $task]);
-            if (!$apiIntegrationTask) {
-                $externalCategoryId = $this->postTask($task, $token);
-
-                $apiIntegrationTask = new ApiIntegrationTask();
-                $apiIntegrationTask->setExternalId($externalCategoryId)
-                    ->setTask($task)
-                    ->setApiIntegration($apiIntegration);
-                $this->em->persist($apiIntegrationTask);
-                $this->em->flush();
+            if ($apiIntegrationTask) {
+                continue;
             }
+
+            $externalCategoryId = $this->postTask($task, $token);
+
+            $apiIntegrationTask = new ApiIntegrationTask();
+            $apiIntegrationTask->setExternalId($externalCategoryId)
+                ->setTask($task)
+                ->setApiIntegration($apiIntegration);
+            $this->em->persist($apiIntegrationTask);
         }
+
+        $this->em->flush();
     }
 
-    private function postTask(Task $task, $token): int
+    private function postTask(Task $task, string $token): int
     {
         $category = $task->getCategory();
 
         $repository = $this->em->getRepository(ApiIntegrationCategory::class);
         $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
 
+//        $repository = $this->em->getRepository(ApiIntegrationTask::class);
+//        $apiIntegrationTask = $repository->findBy(['category' => $category->getId()]);
+
         $externalCategoryId = $apiIntegrationCategory[0]->getExternalId();
-//        $internalCategoryId = $apiIntegrationCategory[0]->getCategory()->getId();
-//        $externalCategoryId = $repository->findBy(['category' => $internalCategoryId]);
         $response = $this->makeRequest(
             self::HOST . self::NOTE_URL,
             'POST',
@@ -162,7 +165,6 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
                       'text' => $task->getText(),
                       "category" => [
                             'id' => $externalCategoryId
-//                            'id' => $apiIntegrationCategory[0]->getExternalId() //set external category id
                       ]
                 ]
             ]
@@ -173,6 +175,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             throw new \Exception('JWT Token not found');
         }
 
+        // TODO: fix  return externalTaskId
         return $externalCategoryId;
     }
 
@@ -252,7 +255,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         return $response;
     }
 
-    public function verify(?ApiIntegration $apiIntegration, bool $enabled, User $user, $data): void
+    public function verify(?ApiIntegration $apiIntegration, bool $enabled, User $user, array $data): void
     {
         if ($enabled) {
             $userPassword = $data['notelist-token'] ?? null;
