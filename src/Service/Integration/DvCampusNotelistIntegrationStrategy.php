@@ -195,7 +195,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         return json_decode($response->getContent(), true)['id'];
     }
 
-    private function login(string $username, string $password): ?string
+    public function login(string $username, string $password): ?string
     {
         $response = $this->makeRequest(
             self::HOST . self::LOGIN_URL,

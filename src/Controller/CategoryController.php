@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\ApiIntegration;
 use App\Entity\Category;
+use App\Enum\ApiIntegrationsEnum;
 use App\Enum\FlashMessagesEnum;
 use App\Form\CategoryType;
 use App\Service\CategoryService;
+use App\Service\Integration\CategoryIntegration;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,8 +39,9 @@ class CategoryController extends AbstractController
 
     /**
      * @Route("/new", name="new", methods={"GET", "POST"})
+     * @throws \App\Exception\ValidationException
      */
-    public function newAction(Request $request, EntityManagerInterface $em): Response
+    public function newAction(Request $request, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         $form = $this->createForm(CategoryType::class);
 
@@ -47,6 +51,8 @@ class CategoryController extends AbstractController
             $em->persist($category);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category "%s" was created', $category->getTitle()));
+
+            $categoryIntegration->checkAndIntegrate();
 
             return $this->redirectToRoute('checklist_all');
         }
