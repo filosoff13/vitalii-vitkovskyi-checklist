@@ -150,10 +150,6 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
 
         $repository = $this->em->getRepository(ApiIntegrationCategory::class);
         $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
-
-//        $repository = $this->em->getRepository(ApiIntegrationTask::class);
-//        $apiIntegrationTask = $repository->findBy(['category' => $category->getId()]);
-
         $externalCategoryId = $apiIntegrationCategory[0]->getExternalId();
         $response = $this->makeRequest(
             self::HOST . self::NOTE_URL,
@@ -175,8 +171,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             throw new \Exception('JWT Token not found');
         }
 
-        // TODO: fix  return externalTaskId
-        return $externalCategoryId;
+        return json_decode($response->getContent(), true)['id'];
     }
 
     private function postCategory(string $name, $token): int
