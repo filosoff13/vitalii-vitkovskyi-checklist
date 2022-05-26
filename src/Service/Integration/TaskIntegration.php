@@ -10,7 +10,7 @@ use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Security;
 
-class CategoryIntegration
+class TaskIntegration
 {
     private EntityManagerInterface $em;
     private Security $security;
@@ -32,6 +32,7 @@ class CategoryIntegration
             'type' => ApiIntegrationsEnum::NOTELIST
         ]);
 
+        $enabled = $apiIntegration->getEnabled();
         if ($apiIntegration->getEnabled()) {
             $userPassword = $apiIntegration->getConfig()['password'];
 

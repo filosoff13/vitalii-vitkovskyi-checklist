@@ -8,6 +8,7 @@ use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
+use App\Service\Integration\TaskIntegration;
 use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -82,8 +83,9 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
+     * @throws \App\Exception\ValidationException
      */
-    public function createAction(Request $request, EntityManagerInterface $em): Response
+    public function createAction(Request $request, EntityManagerInterface $em, TaskIntegration $integration): Response
     {
         $form = $this->createForm(TaskType::class);
 
@@ -93,6 +95,8 @@ class TaskController extends AbstractController
             $em->persist($task);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));
+
+            $integration->checkAndIntegrate();
 
             return $this->redirectToRoute('checklist_all');
         }

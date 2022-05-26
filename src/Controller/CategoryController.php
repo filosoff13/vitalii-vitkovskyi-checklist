@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\ApiIntegration;
 use App\Entity\Category;
-use App\Enum\ApiIntegrationsEnum;
 use App\Enum\FlashMessagesEnum;
 use App\Form\CategoryType;
 use App\Service\CategoryService;
