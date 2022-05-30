@@ -17,7 +17,7 @@ class ApiIntegrationTask
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private ?int $id;
+    private ?int $id = null;
 
     /**
      * @ORM\ManyToOne(targetEntity=ApiIntegration::class)
@@ -27,7 +27,7 @@ class ApiIntegrationTask
 
     /**
      * @ORM\ManyToOne(targetEntity=Task::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private ?Task $task;
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\ApiIntegrationCategory;
+use App\Entity\ApiIntegrationTask;
 use App\Entity\Category;
 use App\Enum\FlashMessagesEnum;
 use App\Form\CategoryType;
@@ -65,8 +67,13 @@ class CategoryController extends AbstractController
      *
      * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
-    public function deleteAction(Category $category, EntityManagerInterface $em): Response
+    public function deleteAction(Category $category, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
+        //TODO delete apiIntegration
+        $repository = $em->getRepository(ApiIntegrationCategory::class);
+        $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
+        $categoryIntegration->checkAndDelete($apiIntegrationCategory[0]->getExternalId());
+        $em->remove((object)$apiIntegrationCategory[0]);
         $em->remove($category);
         $em->flush();
 

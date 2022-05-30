@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\ApiIntegrationTask;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
-use App\Service\Integration\TaskIntegration;
+use App\Service\Integration\CategoryIntegration;
 use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -85,7 +86,7 @@ class TaskController extends AbstractController
      * @Route("/create", name="create", methods={"GET", "POST"})
      * @throws \App\Exception\ValidationException
      */
-    public function createAction(Request $request, EntityManagerInterface $em, TaskIntegration $integration): Response
+    public function createAction(Request $request, EntityManagerInterface $em, CategoryIntegration $integration): Response
     {
         $form = $this->createForm(TaskType::class);
 
@@ -119,6 +120,10 @@ class TaskController extends AbstractController
             $task->getUsers()->removeElement($this->getUser());
         }
 
+        //TODO delete apiIntegration
+        $repository = $em->getRepository(ApiIntegrationTask::class);
+        $apiIntegrationTask = $repository->findBy(['task' => $task]);
+        $em->remove((object)$apiIntegrationTask);
         $em->flush();
 
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));

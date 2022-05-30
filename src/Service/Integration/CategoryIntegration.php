@@ -45,6 +45,27 @@ class CategoryIntegration
             $this->strategy->getCategories($user, $token, $apiIntegration);
             $this->strategy->getTasks($user, $token, $apiIntegration);
         }
+    }
 
+    public function checkAndDelete(int $id): void
+    {
+        $repository = $this->em->getRepository(ApiIntegration::class);
+        $user = $this->security->getUser();
+        $apiIntegration = $repository->findOneOrNullBy([
+            'user' => $user,
+            'type' => ApiIntegrationsEnum::NOTELIST
+        ]);
+
+        if ($apiIntegration->getEnabled()) {
+            $userPassword = $apiIntegration->getConfig()['password'];
+
+            if (!$userPassword) {
+                throw new ValidationException('Token missed');
+            }
+
+            $username = $user->getUserIdentifier();
+            $token = $this->strategy->login($username, (string)$userPassword);
+            $this->strategy->deleteCategory($token, $id);
+        }
     }
 }

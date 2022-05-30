@@ -23,6 +23,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
     const CREATE_USER_URL = '/user';
     const LOGIN_URL = '/login_check';
     const CATEGORY_URL = '/category';
+    const CATEGORY_DELETE_URL = '/category/%d';
     const NOTE_URL = '/note';
 
     private HttpClientInterface $client;
@@ -193,6 +194,22 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         }
 
         return json_decode($response->getContent(), true)['id'];
+    }
+
+    public function deleteCategory($token, int $id): void
+    {
+        $response = $this->makeRequest(
+            sprintf(self::HOST . self::CATEGORY_DELETE_URL, $id),
+            'DELETE',
+            [
+                'headers' => ['Authorization' => sprintf('Bearer %s', $token)]
+            ]
+        );
+
+        $statusCode = $response->getStatusCode(false);
+        if ($statusCode === Response::HTTP_UNAUTHORIZED) {
+            throw new \Exception('JWT Token not found');
+        }
     }
 
     public function login(string $username, string $password): ?string
