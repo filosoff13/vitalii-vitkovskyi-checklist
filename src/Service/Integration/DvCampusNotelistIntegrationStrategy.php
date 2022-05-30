@@ -25,6 +25,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
     const CATEGORY_URL = '/category';
     const CATEGORY_DELETE_URL = '/category/%d';
     const NOTE_DELETE_URL = '/note/%d';
+    const NOTE_EDIT_URL = '/note/%d';
     const NOTE_URL = '/note';
 
     private HttpClientInterface $client;
@@ -220,6 +221,34 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
             'DELETE',
             [
                 'headers' => ['Authorization' => sprintf('Bearer %s', $token)]
+            ]
+        );
+
+        $statusCode = $response->getStatusCode(false);
+        if ($statusCode === Response::HTTP_UNAUTHORIZED) {
+            throw new \Exception('JWT Token not found');
+        }
+    }
+
+    public function editTask(Task $task, string $token, int $externalTaskId): void
+    {
+        $category = $task->getCategory();
+
+        $repository = $this->em->getRepository(ApiIntegrationCategory::class);
+        $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
+        $externalCategoryId = $apiIntegrationCategory[0]->getExternalId();
+        $response = $this->makeRequest(
+            sprintf(self::HOST . self::NOTE_EDIT_URL, $externalTaskId),
+            'PUT',
+            [
+                'headers' => ['Authorization' => sprintf('Bearer %s', $token)],
+                'json' => [
+                    'title' => $task->getTitle(),
+                    'text' => $task->getText(),
+                    "category" => [
+                        'id' => $externalCategoryId
+                    ]
+                ]
             ]
         );
 

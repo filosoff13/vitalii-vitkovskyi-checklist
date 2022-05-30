@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Integration;
 
 use App\Entity\ApiIntegration;
+use App\Entity\Task;
 use App\Enum\ApiIntegrationsEnum;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,7 +48,7 @@ class CategoryIntegration
         }
     }
 
-    public function checkAndDelete(int $id, $category = true): void
+    public function checkAndDelete(int $id, bool $category = true): void
     {
         $repository = $this->em->getRepository(ApiIntegration::class);
         $user = $this->security->getUser();
@@ -70,6 +71,28 @@ class CategoryIntegration
             } else {
                 $this->strategy->deleteTask($token, $id);
             }
+        }
+    }
+
+    public function checkAndEdit(Task $task, int $externalTaskId): void
+    {
+        $repository = $this->em->getRepository(ApiIntegration::class);
+        $user = $this->security->getUser();
+        $apiIntegration = $repository->findOneOrNullBy([
+            'user' => $user,
+            'type' => ApiIntegrationsEnum::NOTELIST
+        ]);
+
+        if ($apiIntegration->getEnabled()) {
+            $userPassword = $apiIntegration->getConfig()['password'];
+
+            if (!$userPassword) {
+                throw new ValidationException('Token missed');
+            }
+
+            $username = $user->getUserIdentifier();
+            $token = $this->strategy->login($username, (string)$userPassword);
+            $this->strategy->editTask($task, $token, $externalTaskId);
         }
     }
 }

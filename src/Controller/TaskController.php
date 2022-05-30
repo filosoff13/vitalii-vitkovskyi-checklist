@@ -84,7 +84,6 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
-     * @throws \App\Exception\ValidationException
      */
     public function createAction(Request $request, EntityManagerInterface $em, CategoryIntegration $integration): Response
     {
@@ -120,7 +119,6 @@ class TaskController extends AbstractController
             $task->getUsers()->removeElement($this->getUser());
         }
 
-        //TODO delete apiIntegration
         $repository = $em->getRepository(ApiIntegrationTask::class);
         $apiIntegrationTask = $repository->findBy(['task' => $task]);
         $categoryIntegration->checkAndDelete($apiIntegrationTask[0]->getExternalId(), false);
@@ -135,12 +133,15 @@ class TaskController extends AbstractController
     /**
      * @Route("/edit/{id}", name="edit", methods={"GET", "POST"})
      */
-    public function editAction(Request $request, Task $task, EntityManagerInterface $em): Response
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $repository = $em->getRepository(ApiIntegrationTask::class);
+            $apiIntegrationTask = $repository->findBy(['task' => $task]);
+            $categoryIntegration->checkAndEdit($task, $apiIntegrationTask[0]->getExternalId());
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $task->getTitle()));
 
@@ -156,4 +157,3 @@ class TaskController extends AbstractController
         ]);
     }
 }
-
