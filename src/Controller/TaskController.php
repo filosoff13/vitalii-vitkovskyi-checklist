@@ -112,7 +112,7 @@ class TaskController extends AbstractController
      *
      * @IsGranted("IS_SHARED", subject="task", statusCode=404)
      */
-    public function deleteAction(Task $task, EntityManagerInterface $em): Response
+    public function deleteAction(Task $task, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         if ($this->getUser() === $task->getUser()){
             $em->remove($task);
@@ -123,7 +123,8 @@ class TaskController extends AbstractController
         //TODO delete apiIntegration
         $repository = $em->getRepository(ApiIntegrationTask::class);
         $apiIntegrationTask = $repository->findBy(['task' => $task]);
-        $em->remove((object)$apiIntegrationTask);
+        $categoryIntegration->checkAndDelete($apiIntegrationTask[0]->getExternalId(), false);
+        $em->remove((object)$apiIntegrationTask[0]);
         $em->flush();
 
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));

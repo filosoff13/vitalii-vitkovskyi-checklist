@@ -47,7 +47,7 @@ class CategoryIntegration
         }
     }
 
-    public function checkAndDelete(int $id): void
+    public function checkAndDelete(int $id, $category = true): void
     {
         $repository = $this->em->getRepository(ApiIntegration::class);
         $user = $this->security->getUser();
@@ -65,7 +65,11 @@ class CategoryIntegration
 
             $username = $user->getUserIdentifier();
             $token = $this->strategy->login($username, (string)$userPassword);
-            $this->strategy->deleteCategory($token, $id);
+            if ($category) {
+                $this->strategy->deleteCategory($token, $id);
+            } else {
+                $this->strategy->deleteTask($token, $id);
+            }
         }
     }
 }
