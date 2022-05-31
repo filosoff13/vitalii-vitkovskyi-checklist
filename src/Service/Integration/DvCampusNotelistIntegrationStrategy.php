@@ -177,7 +177,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         return json_decode($response->getContent(), true)['id'];
     }
 
-    private function postCategory(string $name, $token): int
+    private function postCategory(string $name, string $token): int
     {
         $response = $this->makeRequest(
             self::HOST . self::CATEGORY_URL,
@@ -198,7 +198,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         return json_decode($response->getContent(), true)['id'];
     }
 
-    public function deleteCategory($token, int $id): void
+    public function deleteCategory(string $token, int $id): void
     {
         $response = $this->makeRequest(
             sprintf(self::HOST . self::CATEGORY_DELETE_URL, $id),
@@ -214,7 +214,7 @@ class DvCampusNotelistIntegrationStrategy extends AbstractIntegrationStrategy
         }
     }
 
-    public function deleteTask($token, int $id): void
+    public function deleteTask(string $token, int $id): void
     {
         $response = $this->makeRequest(
             sprintf(self::HOST . self::NOTE_DELETE_URL, $id),

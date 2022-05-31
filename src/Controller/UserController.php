@@ -73,4 +73,3 @@ class UserController extends AbstractController
         throw new \Exception('Unreachable statement');
     }
 }
-

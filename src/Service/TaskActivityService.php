@@ -10,7 +10,6 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class TaskActivityService
