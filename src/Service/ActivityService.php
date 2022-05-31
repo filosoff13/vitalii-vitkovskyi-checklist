@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Activity\VisitActivity;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,6 +33,13 @@ class ActivityService
             $request->getClientIp(),
             $user instanceof User ? $user : null
         );
+
+        if (!$this->em->isOpen()) {
+            $this->em = $this->em->create(
+                $this->em->getConnection(),
+                $this->em->getConfiguration()
+            );
+        }
 
         $this->em->persist($activity);
         $this->em->flush($activity);

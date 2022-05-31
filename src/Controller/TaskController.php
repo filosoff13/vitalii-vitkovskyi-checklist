@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\ApiIntegrationTask;
 use App\Entity\Category;
 use App\Entity\Task;
 use App\Enum\FlashMessagesEnum;
 use App\Form\TaskType;
+use App\Service\Integration\CategoryIntegration;
 use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -83,7 +85,7 @@ class TaskController extends AbstractController
     /**
      * @Route("/create", name="create", methods={"GET", "POST"})
      */
-    public function createAction(Request $request, EntityManagerInterface $em): Response
+    public function createAction(Request $request, EntityManagerInterface $em, CategoryIntegration $integration): Response
     {
         $form = $this->createForm(TaskType::class);
 
@@ -93,6 +95,8 @@ class TaskController extends AbstractController
             $em->persist($task);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was created', $task->getTitle()));
+
+            $integration->checkAndIntegrate();
 
             return $this->redirectToRoute('checklist_all');
         }
@@ -107,7 +111,7 @@ class TaskController extends AbstractController
      *
      * @IsGranted("IS_SHARED", subject="task", statusCode=404)
      */
-    public function deleteAction(Task $task, EntityManagerInterface $em): Response
+    public function deleteAction(Task $task, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         if ($this->getUser() === $task->getUser()){
             $em->remove($task);
@@ -115,6 +119,10 @@ class TaskController extends AbstractController
             $task->getUsers()->removeElement($this->getUser());
         }
 
+        $repository = $em->getRepository(ApiIntegrationTask::class);
+        $apiIntegrationTask = $repository->findBy(['task' => $task]);
+        $categoryIntegration->checkAndDelete($apiIntegrationTask[0]->getExternalId(), false);
+        $em->remove((object)$apiIntegrationTask[0]);
         $em->flush();
 
         $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was deleted', $task->getTitle()));
@@ -125,12 +133,15 @@ class TaskController extends AbstractController
     /**
      * @Route("/edit/{id}", name="edit", methods={"GET", "POST"})
      */
-    public function editAction(Request $request, Task $task, EntityManagerInterface $em): Response
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $repository = $em->getRepository(ApiIntegrationTask::class);
+            $apiIntegrationTask = $repository->findBy(['task' => $task]);
+            $categoryIntegration->checkAndEdit($task, $apiIntegrationTask[0]->getExternalId());
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Task "%s" was edited', $task->getTitle()));
 
@@ -146,4 +157,3 @@ class TaskController extends AbstractController
         ]);
     }
 }
-

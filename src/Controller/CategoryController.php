@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\ApiIntegrationCategory;
 use App\Entity\Category;
 use App\Enum\FlashMessagesEnum;
 use App\Form\CategoryType;
 use App\Service\CategoryService;
+use App\Service\Integration\CategoryIntegration;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,8 +38,9 @@ class CategoryController extends AbstractController
 
     /**
      * @Route("/new", name="new", methods={"GET", "POST"})
+     * @throws \App\Exception\ValidationException
      */
-    public function newAction(Request $request, EntityManagerInterface $em): Response
+    public function newAction(Request $request, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
         $form = $this->createForm(CategoryType::class);
 
@@ -47,6 +50,8 @@ class CategoryController extends AbstractController
             $em->persist($category);
             $em->flush();
             $this->addFlash(FlashMessagesEnum::SUCCESS, sprintf('Category "%s" was created', $category->getTitle()));
+
+            $categoryIntegration->checkAndIntegrate();
 
             return $this->redirectToRoute('checklist_all');
         }
@@ -61,8 +66,12 @@ class CategoryController extends AbstractController
      *
      * @IsGranted("IS_OWNER", subject="category", statusCode=404)
      */
-    public function deleteAction(Category $category, EntityManagerInterface $em): Response
+    public function deleteAction(Category $category, EntityManagerInterface $em, CategoryIntegration $categoryIntegration): Response
     {
+        $repository = $em->getRepository(ApiIntegrationCategory::class);
+        $apiIntegrationCategory = $repository->findBy(['category' => $category->getId()]);
+        $categoryIntegration->checkAndDelete($apiIntegrationCategory[0]->getExternalId());
+        $em->remove((object)$apiIntegrationCategory[0]);
         $em->remove($category);
         $em->flush();
 

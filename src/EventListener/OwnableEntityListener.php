@@ -25,7 +25,9 @@ class OwnableEntityListener
             return;
         }
 
-        $entity->setUser($this->getUser());
+        if ($this->getUser() instanceof UserInterface) {
+            $entity->setUser($this->getUser());
+        }
     }
 
     private function getUser(): ?UserInterface

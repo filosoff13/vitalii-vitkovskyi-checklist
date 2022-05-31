@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Api integration status{% endblock %}
+
+{% block body %}
+    <script>
+        function disableEnableField(){
+
+            let disabled = document.getElementById('dv-notelist').checked;
+            if(disabled===false){ //disable
+                document.getElementById('dv-notelist-tokent').disabled = true;
+                document.getElementById('dv-notelist-tokent').value = "";
+            }
+            else{  //enable again
+                document.getElementById('dv-notelist-tokent').disabled = false;
+                document.getElementById('dv-notelist-tokent').value = "";
+            }
+        }
+    </script>
+    <form action="{{ path('integration_setup') }}" method="POST">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Type of integration</th>
+                <th scope="col">Apply</th>
+                <th scope="col">Token</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for integration in integrations %}
+                <tr>
+{#                    <td><label for="dv-notelist">{{ getIntegrationNameByType(integration.type) }}</label></td>#}
+                    <td><label for="dv-notelist">DvCampusNotelistIntegration</label></td>
+                    <td>
+                        <input type="checkbox" onclick="disableEnableField()" name="notelist-enabled" data-toggle="toggle" id="dv-notelist" {% if integration.enabled %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <input type="text" name="notelist-token" id="dv-notelist-tokent">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-success" type="submit">Submit</button>
+    </form>
+{% endblock %}
